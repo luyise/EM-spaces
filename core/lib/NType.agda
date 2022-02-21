@@ -181,3 +181,31 @@ module _ {i} where
     contr-has-section : ∀ {j} {A : Type i} {B : A → Type j}
       → (is-contr A → (x : A) → (u : B x) → Π A B)
     contr-has-section {B = B} p x₀ y₀ t = transport B (! (contr-path p x₀) ∙ contr-path p t) y₀
+
+{- Results about the empty type -}
+
+Empty-is-prop : is-prop Empty
+Empty-is-prop = has-level-in Empty-elim
+
+instance
+  Empty-level : {n : ℕ₋₂} → has-level (S n) Empty
+  Empty-level = prop-has-level-S Empty-is-prop
+
+{- Subtypes -}
+
+-- TODO: replace them by records, with the second field an instance field
+
+module _ {i} (A : Type i) where
+  SubtypeProp : ∀ j → Type (lmax i (lsucc j))
+  SubtypeProp j = Σ (A → Type j) (λ P → ∀ a → is-prop (P a))
+
+module SubtypeProp {i j} {A : Type i} (P : SubtypeProp A j) where
+  prop = fst P
+  level = snd P
+
+module _ {i j} {A : Type i} (P : SubtypeProp A j) where
+  private
+    module P = SubtypeProp P
+
+  Subtype : Type (lmax i j)
+  Subtype = Σ A P.prop

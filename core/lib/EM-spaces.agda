@@ -6,10 +6,13 @@ written by Leclerc L.
 {-# OPTIONS --without-K --warning ignore #-}
 
 open import lib.Base
-open import lib.Funext
-open import lib.Function
 open import lib.Equivalence
+open import lib.Equivalence2
+open import lib.Function
+open import lib.Funext
+open import lib.Homogeneous
 open import lib.NType
+open import lib.NType2
 open import lib.NConnected
 open import lib.PathFunctor
 open import lib.PathGroupoid
@@ -21,6 +24,7 @@ open import lib.types.Pointed
 open import lib.types.LoopSpace
 open import lib.types.Paths
 open import lib.types.Pi
+open import lib.types.Truncation
 open import lib.types.Sigma
 
 module lib.EM-spaces where
@@ -252,10 +256,10 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
 module is-contr-Ω-fiber 
   {i} {A : Type i} {a : A} 
   {j} {B : Type j} {b : B}
-  {n}
-  (lA : has-level (S (S (S (S n)))) A)
-  (cA : is (S (S (S n))) connected A)
-  (lB : has-level (S (S (S (S n)))) B)
+  {n} (0<n : 0 < n)
+  (lA : has-level ⟨ 1 + n ⟩ A)
+  (cA : is ⟨ n ⟩ connected A)
+  (lB : has-level ⟨ n *2 ⟩ B)
   (⊙g : ⊙Ω ⊙[ A , a ] ⊙→ ⊙Ω ⊙[ B , b ])
   where
 
@@ -291,6 +295,16 @@ module is-contr-Ω-fiber
     Π A C
       ≃∎
 
+  !-inv-l-nulhomotop-inversion : ∀ {i}
+    → {X : Type i} {x y : X} (α : y == x)
+    → (ω : x == x) (H : ω == idp)
+    → Σ (y == x) λ p
+    → Σ (! p ∙ p == ω) λ eq
+    → PathOver (_== idp) eq (!-inv-l p) H
+  !-inv-l-nulhomotop-inversion 
+    {x = x} {y = .x} idp idp idp = 
+      idp , idp , idp
+
   simplify-C : {x : A} (α₀ : x == a) 
     → C x ≃ 
     ( Σ B λ y
@@ -301,12 +315,166 @@ module is-contr-Ω-fiber
     → (_ ,
       lemma-1-0-2 _
         (λ α → fold α h == ⊙g) α₀ 
-        (S n) ((snd cA) _ a) 
-        (λ α → {!   !}))
-  
+        ⟨ n ⟩₋₂ (snd cA _ a)
+        (λ α → has-level-apply (
+          lemma-1-0-3 _ _ _ _ _ _ 
+          (snd cA a a) λ _ → has-level-apply 
+            (transport (λ m → has-level m B) (computation n) lB) 
+            b b
+        ) 
+        (fold α h) ⊙g))
+    where private
+      computation : (k : ℕ) → ⟨ k *2 ⟩ == (S (S (⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂)))
+      computation 0 = idp
+      computation (S k) = 
+        ⟨ S (S (k *2)) ⟩
+          =⟨ idp ⟩
+        S (S ⟨ k *2 ⟩)
+          =⟨ ap (λ q → S (S q)) (computation k) ⟩
+        S (S (S (S (⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂))))
+          =⟨ idp ⟩
+        S (S (S (S ⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂)))
+          =⟨ ap (λ q → S (S (S q))) (+2+-comm (S ⟨ k ⟩₋₂) ⟨ k ⟩₋₂) ⟩
+        S (S (S (⟨ k ⟩₋₂ +2+ S ⟨ k ⟩₋₂)))
+          =⟨ idp ⟩
+        (S (S (⟨ S k ⟩₋₂ +2+ ⟨ S k ⟩₋₂)))
+          =∎
+
+  Cxy-pathto-equivalence : (x : A) (α : x == a) (y : B)
+      (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
+    → ( Σ (x == a → y == b) λ h
+      → (fold α h == ⊙g' ) ) 
+    ≃ ( y == b )
+  Cxy-pathto-equivalence x α y ⊙g' = to α y ⊙g' , 
+    contr-map-is-equiv λ β → is-contr-to-hfiber α y ⊙g' β
+    where
+      to : {x : A} (α : x == a) (y : B) (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
+        → ( Σ (x == a → y == b) λ h
+            → (fold α h == ⊙g' ) ) 
+        → ( y == b )
+      to α y _ = λ{ (h , _) → h α }
+
+      is-contr-to-hfiber : {x : A} (α : x == a) (y : B) 
+        (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B) (β : y == b)
+        → is-contr (hfiber (to α y ⊙g') β)
+      is-contr-to-hfiber idp .b ⊙g' idp = 
+        has-level-in (((g' , lemma-1-0-4-2 (is-homogeneous-Ω ⊙B) idp idp (λ ω → ! (g' idp) ∙ (g' ω)) g' (λ= λ ω → ap (λ p → ! p ∙ g' ω) g₀') (!-inv-l (g' idp)) g₀') , g₀') 
+        , λ{ ((h , foldh=⊙g') , eq) → {!   !} })
+          where private
+            g' = fst ⊙g'
+            g₀' = snd ⊙g'
+
+      -- private
+      --   lemma : {x : B} (ω : x == x) (H : ω == idp)
+      --     → !-inv-l ω ==
+      --       ap (λ p → ! p ∙ ω) H ∙ H
+      --   lemma .idp idp = idp
+
+      -- from : {x : A} (α : x == a) {y : B} (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
+      --   → (y == b) 
+      --   → ( Σ (x == a → y == b) λ h
+      --      → (fold α h == ⊙g' ) )
+      -- from idp ⊙g' idp = 
+      --   g' , ⊙λ=
+      --     ((λ ω → ap (λ p → ! p ∙ g' ω) g₀') 
+      --     , ↓-idf=cst-in (lemma (g' idp) g₀'))
+      --   where 
+      --     g' = fst ⊙g'
+      --     g₀' = snd ⊙g'
+
+      -- from-to : {x : A} {α : x == a} {y : B}
+      --   → (h : x == a → y == b) 
+      --   → (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
+      --   → (eq : fold α h == ⊙g')
+      --   → from α ⊙g' (to α y ⊙g' (h , eq)) == (h , eq)
+      -- from-to {α = idp} h .(fold idp h) idp =
+      --   from idp (fold idp h) (to idp _ (fold idp h) (h , idp))
+      --     =⟨ idp ⟩
+      --   from idp (fold idp h) (h idp)
+      --     =⟨ pair= (λ= λ ω → {!   !}) {!   !} ⟩
+      --   {!   !}
+      --     =⟨ {!   !} ⟩
+      --   h , idp
+      --     =∎
+      --   where
+      --     from-idp-β : {y : B}
+      --       → (β : y == b)
+      --       → (h : a == a → y == b)
+      --       → from idp (fold idp h) β == h , idp
+      --     from-idp-β idp h =
+      --       from idp (fold idp h) idp
+      --         =⟨ idp ⟩
+      --       fst (fold idp h) , _
+      --         =⟨ {!   !} ⟩
+      --       {!   !}
+      --         =⟨ {!   !} ⟩
+      --       h , idp
+      --         =∎
+      
+      -- to-from : {x : A} (α : x == a) (⊙g' : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
+      --   {y : B} (β : y == b) →
+      --   to α y ⊙g' (from α ⊙g' β) == β
+      -- to-from idp ⊙g' idp = snd ⊙g'
+
+  -- Cay-pathto-equivalence y = (λ{ (f , _) -> f idp }) , 
+  --   is-eq _ 
+  --     (from y)
+  --     (λ{ idp -> g₀ }) 
+  --     λ{ (h , eq) → pair= (λ= λ ω → to-from-β y (h idp) ω 
+  --       ∙ (ap (h idp ∙_) (! (fst (⊙app= eq) ω)) 
+  --       ∙ (! (∙-assoc (h idp) (! (h idp)) (h ω)))) 
+  --       ∙ (ap (_∙ h ω) (!-inv-r (h idp)))) 
+  --       (↓-app=cst-in {!   !}) }
+  --   where private
+  --     lemma : {x : B} (ω : x == x) (H : ω == idp)
+  --       → !-inv-l ω ==
+  --         ap (λ p → ! p ∙ ω) H ∙ H
+  --     lemma .idp idp = idp
+
+  --     from : (y : B) → y == b → 
+  --       ( Σ (a == a → y == b) λ h
+  --         → (fold idp h == ⊙g ))
+  --     from y α = ( (λ ω → α ∙ g ω) , 
+  --       ⊙λ= ((λ ω → 
+  --         ap (λ p → p ∙ α ∙ g ω) (!-∙ α (g idp)) 
+  --         ∙ ap (λ p → (! p ∙ ! α) ∙ α ∙ g ω) g₀
+  --         ∙ ! (∙-assoc (! α) α (g ω))
+  --         ∙ ap (_∙ g ω) (!-inv-l α)) , 
+  --       ↓-idf=cst-in {!   !}) )
+
+  --     to-from-β : (y : B) (α : y == b) (ω : a == a)
+  --       → fst (from y α) ω == α ∙ g ω
+  --     to-from-β .b idp _ = idp
+
+      -- to-from-β' : (y : B) (α : y == b) (ω : a == a)
+      --   → snd (from y α) ==
+            --  ⊙λ= ((λ ω → ap (λ p → ! p ∙ α ∙ g ω) g₀) , ↓-idf=cst-in ((lemma (g idp) g₀))))
+
+      -- technical_lemma : {y : B} (α : y == b) (ω : a == a)
+      --   → snd (from y α) ==
+      --     ap (λ z → (λ ω → ! (z idp) ∙ z ω) , !-inv-l (z idp))
+      --       (λ=
+      --         (λ ω →
+      --           to-from-β y α ω ∙
+      --           (ap (α ∙_) (! (ap (λ u → u ω) (ap fst eq))) ∙
+      --           ! (∙-assoc α (! α) (h ω)))
+      --           ∙ ap (_∙ h ω) (!-inv-r α)))
+      --         ∙ eq
+      -- technical_lemma idp ω = ?
+    
   is-contr-C : (x : A) → is-contr (C x)
-  is-contr-C x = {!   !}
+  is-contr-C x = ∥⋅∥-rec is-contr-is-prop (λ p → transport _ p is-contr-Ca) (fst (snd cA a x))
+    where abstract
+      private
+        lemma : {x : B} (ω : x == x) (H : ω == idp)
+          → !-inv-l ω ==
+            ap (λ p → ! p ∙ ω) H ∙ H
+        lemma .idp idp = idp
+
+      is-contr-Ca : is-contr (C a)
+      is-contr-Ca = equiv-preserves-level (simplify-C idp ⁻¹ ∘e (Σ-emap-r (λ y → Cxy-pathto-equivalence a idp y ⊙g ⁻¹)))
+        {{ pathto-is-contr b }}
 
   is-contr-fiber : is-contr (hfiber ⊙Ω-fmap ⊙g)
   is-contr-fiber = equiv-preserves-level (reformulating-Ω-fiber ⁻¹) 
-    {{weak-λ= λ x → is-contr-C x}}
+    {{weak-λ= λ x → is-contr-C x}}  
