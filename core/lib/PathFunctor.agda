@@ -147,6 +147,10 @@ module _ {i j} {A : Type i} {B : Type j} where
     → h ∙ ap g p == ap f p ∙ transport (λ a → f a == g a) p h
   ap-transp f g p@idp h = ∙-unit-r h
 
+  ap-transp-cst-in : {f : A → B} {b : B} {a₀ a₁ : A} (p : a₀ == a₁) (h : f a₀ == b)
+    → transport (λ a → f a == b) p h == ! (ap f p) ∙ h
+  ap-transp-cst-in idp h = idp
+
   ap-transp-idp : (f : A → B)
     {a₀ a₁ : A} (p : a₀ == a₁)
     → ap-transp f f p idp ◃∙

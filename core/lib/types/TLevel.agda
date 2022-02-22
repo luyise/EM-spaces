@@ -1,6 +1,7 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
 open import lib.Base
+open import lib.types.Nat
 open import lib.PathGroupoid
 
 module lib.types.TLevel where
@@ -153,8 +154,6 @@ T-S+2+≠ (S n) k p = T-S+2+≠ n k (ap T-get-S (ap S (! (+2+-βr k n)) ∙ p))
 -2-monotone-≤ (inr lt) = inr (-2-monotone-< lt)
 -}
 
-{-
-
 ⟨⟩-monotone-< : {m n : ℕ} → (m < n) → (⟨ m ⟩ <T ⟨ n ⟩)
 ⟨⟩-monotone-< ltS = ltS
 ⟨⟩-monotone-< (ltSR lt) = ltSR (⟨⟩-monotone-< lt)
@@ -162,8 +161,6 @@ T-S+2+≠ (S n) k p = T-S+2+≠ n k (ap T-get-S (ap S (! (+2+-βr k n)) ∙ p))
 ⟨⟩-monotone-≤ : {m n : ℕ} → (m ≤ n) → (⟨ m ⟩ ≤T ⟨ n ⟩)
 ⟨⟩-monotone-≤ (inl p) = inl (ap ⟨_⟩ p)
 ⟨⟩-monotone-≤ (inr lt) = inr (⟨⟩-monotone-< lt)
-
--}
 
 minT : ℕ₋₂ → ℕ₋₂ → ℕ₋₂
 minT ⟨-2⟩ n = ⟨-2⟩
