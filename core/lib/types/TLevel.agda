@@ -189,4 +189,4 @@ minT-out-l {m} {n} lte with minT-out m n
 minT-out-l lte | inl eqm = eqm
 minT-out-l (inl p) | inr eqn = eqn ∙ ! p
 minT-out-l {m} {n} (inr lt) | inr eq =
-  ⊥-rec (<T-to-≱T (transport (λ k → m <T k) (! eq) lt) (minT≤l m n))
+  ⊥-rec (<T-to-≱T (transport (λ k → m <T k) (! eq) lt) (minT≤l m n)) 

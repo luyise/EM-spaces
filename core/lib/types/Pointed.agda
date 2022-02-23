@@ -64,8 +64,8 @@ open _=⊙∘_ public
 -- function extensionality for pointed maps
 ⊙λ= : ∀ {i j} {X : Ptd i} {Y : Ptd j} {f g : X ⊙→ Y}
   → f ⊙∼ g → f == g
-⊙λ= {g = g} (p , α) = pair= (λ= p)
-  (↓-app=cst-in (↓-idf=cst-out α ∙ ap (_∙ snd g) (! (app=-β p _))))
+⊙λ= {X = X} {g = g} (p , α) = pair= (λ= p)
+  (↓-app=cst-in (↓-idf=cst-out α ∙ ap (_∙ snd g) (! (app=-β p (pt X)))))
 
 ⊙λ=' : ∀ {i j} {X : Ptd i} {Y : Ptd j} {f g : X ⊙→ Y}
   (p : fst f ∼ fst g)

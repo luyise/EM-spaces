@@ -104,3 +104,31 @@ lemma-1-0-3 A P a b n (S k) hA hP = has-level-in
     (lemma-1-0-3-0 A P s t a b q p)
     {{lemma-1-0-3 A (λ (x : A) → s x == t x) a (p ∙ (! q)) n k hA λ x → has-level-apply (hP x) _ _}}
   })
+
+is-set-⊙≃-n-connected-Sn-type :
+  ∀ {i j} {A : Type i} {B : Type j} {n : TLevel}
+  → (is n connected A)
+  → (has-level (S n) B)
+  → (a : A) (b : B)
+  → is-set (⊙[ A , a ] ⊙≃ ⊙[ B , b ])
+is-set-⊙≃-n-connected-Sn-type {A = A} {B = B} {⟨-2⟩}
+  _ is-prop-B a b = Σ-level 
+  (raise-level _ (Σ-level (Π-level (cst is-prop-B)) λ f → raise-level _ (has-level-apply is-prop-B _ _))) 
+  λ ⊙f → raise-level _ is-equiv-is-prop
+is-set-⊙≃-n-connected-Sn-type {A = A} {B = B} {S n}
+  cA lB a b = Σ-level (lemma-1-0-3 A (cst B) a b n _ cA (cst lB)) 
+  λ ⊙f → raise-level _ is-equiv-is-prop
+
+is-Sn-connected-is-n-connected : ∀ {i} {A : Type i} {n}
+  → is (S n) connected A
+  → is n connected A
+is-Sn-connected-is-n-connected {n = ⟨-2⟩} = (λ _ → lift unit)
+is-Sn-connected-is-n-connected {n = S k} SSncA =
+  fst SSncA , λ a₀ a₁ → is-Sn-connected-is-n-connected (snd SSncA a₀ a₁)
+
+is-<T-connected : ∀ {i} {A : Type i} {k n : ℕ₋₂}
+  → k <T n
+  → is n connected A 
+  → is k connected A
+is-<T-connected ltS = is-Sn-connected-is-n-connected
+is-<T-connected (ltSR m<n) SncA = is-<T-connected m<n (is-Sn-connected-is-n-connected SncA)

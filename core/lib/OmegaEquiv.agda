@@ -28,7 +28,7 @@ open import lib.types.TLevel
 open import lib.types.Truncation
 open import lib.types.Sigma
 
-module lib.EM-spaces where
+module lib.OmegaEquiv where
 
 {- First, a result about Ω being an equivalence under
   suitable assumptions -}
@@ -50,14 +50,6 @@ private
   fold α h =
     (λ ω → ! (h α) ∙ h (α ∙ ω)) ,
     ap (λ γ → ! (h α) ∙ h γ) (∙=∙' α idp) ∙ !-inv-l (h α)
-
-  -- ap2-!-inv-l : ∀ {i} {A : Type i} {a b : A}
-  --   {p q : a == b} (H : p == q) →
-  --     !-inv-l p == 
-  --     ap2 (λ α β → ! α ∙ β) H H 
-  --     ∙ !-inv-l q
-  -- ap2-!-inv-l idp = idp
-
 
 module Ω-fiber {i j} {A : Type i} {B : Type j} 
   (a : A) (f : A → B)
@@ -362,7 +354,7 @@ module is-contr-Ω-fiber
 
   Cxy-pathto-equivalence : (x : A) (α : x == a) (y : B)
     → ( Σ (x == a → y == b) λ h
-      → (fold α h == ⊙g ) ) 
+      → (fold α h == ⊙g) ) 
     ≃ ( y == b )
   Cxy-pathto-equivalence x α y = to α y , 
     contr-map-is-equiv λ β → is-contr-to-hfiber α y β
@@ -390,7 +382,7 @@ module is-contr-Ω-fiber
               × (h idp == idp)
           ctr = g , 
             ⊙λ= ((λ ω → ap (λ p → ! p ∙ g ω) g₀) ,
-                 ↓-idf=cst-in (lemma (g idp) g₀)) , 
+                ↓-idf=cst-in ((lemma (g idp) g₀))) , 
             g₀
 
           eq : {h : a == a → b == b}
@@ -400,7 +392,7 @@ module is-contr-Ω-fiber
           eq {h} h1=1 idp = pair= 
             (λ= H) 
             (↓-×-in 
-              (↓-app=cst-in (prop-path (has-level-apply is-set-⊙ΩA-⊙→-⊙ΩB _ _) _ _)) 
+              (↓-app=cst-in (prop-path (has-level-apply is-set-⊙ΩA-⊙→-⊙ΩB _ _) _ _))
               (↓-app=cst-in (lemma (h idp) h1=1 ∙ (ap (_∙ h1=1) (! (app=-β H idp))))))
               where
                 H : g ~ h
@@ -412,6 +404,26 @@ module is-contr-Ω-fiber
                   idp idp ⟨ n ⟩₋₂ ⟨ 0 ⟩ 
                   ((snd cA) a a) 
                   (λ ω → has-level-apply lB b b)
+
+                -- computation : 
+                --   ⊙λ= (
+                --     (λ ω → ap (λ p → ! p ∙ g ω) g₀) , 
+                --     ↓-idf=cst-in (lemma (g idp) g₀)
+                --   ) == ap (λ z → fold idp z) (λ= H)
+                -- computation =
+                --  ⊙λ= (
+                --     (λ ω → ap (λ p → ! p ∙ g ω) g₀) , 
+                --     ↓-idf=cst-in (lemma (g idp) g₀)
+                --   )
+                --     =⟨ idp ⟩
+                --   pair= (λ= P)
+                --     (↓-app=cst-in (↓-idf=cst-out α' ∙ ap (_∙ g₀) (! (app=-β P idp))))
+                --     =⟨ {!   !} ⟩
+                --   ap (λ z → fold idp z) (λ= H)
+                --     =∎
+                --   where private
+                --     P = (λ ω → ap (λ p → ! p ∙ g ω) g₀)
+                --     α' = ↓-idf=cst-in (lemma {x = b} (g idp) g₀)
     
   is-contr-C : (x : A) → is-contr (C x)
   is-contr-C x = ∥⋅∥-rec is-contr-is-prop (λ p → transport _ p is-contr-Ca) (fst (snd cA a x))
@@ -444,4 +456,4 @@ module _
   is-equiv-⊙Ω-fmap : 
     is-equiv (⊙Ω-fmap :> (⊙A ⊙→ ⊙B → ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B))
   is-equiv-⊙Ω-fmap = contr-map-is-equiv
-    λ ⊙g → is-contr-Ω-fiber.is-contr-fiber 0<n cA lB ⊙g
+    λ ⊙g → is-contr-Ω-fiber.is-contr-fiber 0<n cA lB ⊙g  
