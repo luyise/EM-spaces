@@ -450,7 +450,6 @@ module _
   {n} (0<n : 0 < n)
   (cA : is ⟨ n ⟩ connected (de⊙ ⊙A))
   (lB : has-level ⟨ 1 + n ⟩ (de⊙ ⊙B))
-  (⊙g : ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
   where
 
   is-equiv-⊙Ω-fmap : 

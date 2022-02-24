@@ -6,7 +6,6 @@ written by Leclerc L.
 {-# OPTIONS --without-K --warning ignore #-}
 
 open import lib.Base
-
 open import lib.Equivalence
 open import lib.Equivalence2
 open import lib.Fundamental-id-type-thm
@@ -15,11 +14,14 @@ open import lib.Homogeneous
 open import lib.NConnected
 open import lib.NType
 open import lib.NType2
+open import lib.OmegaEquiv
 open import lib.PathGroupoid
 open import lib.PathOver
 open import lib.types.LoopSpace
+open import lib.types.Nat
 open import lib.types.Pointed
 open import lib.types.Sigma
+open import lib.types.TLevel
 open import lib.types.Truncation
 
 module lib.EM-Spaces where
@@ -185,13 +187,42 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
   torsor-loop-space : Ω ⊙[ Torsor , TB ] ≃ B
   torsor-loop-space = _ , torsor-==-≃-space TB
 
-  -- We then show that the type of Torsor is a (n+2)-type,
-  -- which is also (n+1)-connected.
+  torsor-⊙loop-space : ⊙Ω ⊙[ Torsor , TB ] ⊙≃ ⊙B
+  torsor-⊙loop-space = 
+    (((λ (u : TB == TB) → transport fst u b)) , idp) , 
+    torsor-==-≃-space TB
 
-  -- is-connected-torsor : is (S n) connected Torsor
-  -- is-connected-torsor = [ TB ] , 
-  --   λ TA₁ TA₂ → {!   !}
+  -- We then show that the type of Torsor is a n-connected type
 
-  -- has-level-torsor : has-level (S (S n)) Torsor
-  -- has-level-torsor = has-level-in 
-  --   λ TA₁ TA₂ → {!   !}
+  -- is-connected-torsor : is n connected Torsor
+  -- is-connected-torsor = {!   !}
+
+  K = Torsor
+  ⊙K = ⊙[ Torsor , TB ]
+
+-- we may now proove a universal property about
+-- the delooped space.
+
+module _ {i j : ULevel} {n : ℕ} (0<n : 0 < n)
+  (⊙A : Ptd i) (lA : has-level (⟨ S n ⟩) (de⊙ ⊙A)) (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
+  (⊙B : Ptd j) (lB : has-level (⟨ S n ⟩) (de⊙ ⊙B)) (cB : is (⟨ n ⟩) connected (de⊙ ⊙B))
+  (hA : is-homogeneous (de⊙ ⊙A)) (leq⊙A : has-level (⟨ n ⟩) (⊙A == ⊙A))
+  where
+
+  A = de⊙ ⊙A
+  a = pt ⊙A
+
+  ⊙K = higher-torsor.⊙K A a lA cA hA leq⊙A
+
+  -- ⊙K-universal-property :
+  --   (⊙K ⊙→ ⊙B) ≃ (⊙A ⊙→ ⊙Ω ⊙B)
+  -- ⊙K-universal-property =
+  --   (⊙K ⊙→ ⊙B)
+  --     ≃⟨ Ω-equiv ⟩
+  --   {!   !}
+  --     ≃⟨ {!   !} ⟩
+  --   (⊙A ⊙→ ⊙Ω ⊙B)
+  --     ≃∎
+  --   where
+  --     Ω-equiv : (⊙K ⊙→ ⊙B) ≃ (⊙Ω ⊙K ⊙→ ⊙Ω ⊙B)
+  --     Ω-equiv = ⊙Ω-fmap , {! is-equiv-⊙Ω-fmap 0<n cA lB  !}
