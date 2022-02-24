@@ -132,3 +132,9 @@ is-<T-connected : ∀ {i} {A : Type i} {k n : ℕ₋₂}
   → is k connected A
 is-<T-connected ltS = is-Sn-connected-is-n-connected
 is-<T-connected (ltSR m<n) SncA = is-<T-connected m<n (is-Sn-connected-is-n-connected SncA)
+
+is-connected-is-prop : ∀ {i} {A : Type i} {n : ℕ₋₂}
+  → is-prop (is n connected A)
+is-connected-is-prop {A = A} {⟨-2⟩} = equiv-preserves-level (lower-equiv ⁻¹)
+is-connected-is-prop {A = A} {S n} = ×-level is-prop-∥⋅∥ 
+  (Π-level (λ _ → Π-level λ _ → is-connected-is-prop))

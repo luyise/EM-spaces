@@ -191,6 +191,13 @@ instance
   Empty-level : {n : ℕ₋₂} → has-level (S n) Empty
   Empty-level = prop-has-level-S Empty-is-prop
 
+{- About Unit -}
+
+instance
+  Unit-level : {n : ℕ₋₂} → has-level n Unit
+  Unit-level {n = ⟨-2⟩} = has-level-in (unit , λ y → idp)
+  Unit-level {n = S n} = raise-level n Unit-level
+
 {- Subtypes -}
 
 -- TODO: replace them by records, with the second field an instance field
