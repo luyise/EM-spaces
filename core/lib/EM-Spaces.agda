@@ -225,8 +225,8 @@ module _ {i j : ULevel} (n : ℕ)
   (lA : has-level (⟨ S n ⟩) (de⊙ ⊙A)) 
   (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
   (⊙B : Ptd j)
-  (lB : has-level (⟨ S (S n) ⟩) (de⊙ ⊙B))
-  (hA : is-homogeneous (de⊙ ⊙A)) 
+  (lB : has-level (⟨ (S n) *2 ⟩) (de⊙ ⊙B))
+  (hA : is-homogeneous (de⊙ ⊙A))
   (leq⊙A : has-level (⟨ n ⟩) (⊙A == ⊙A))
   where
 

@@ -262,18 +262,9 @@ module is-contr-Ω-fiber
   {j} {B : Type j} {b : B}
   {n} (0<n : 0 < n)
   (cA : is ⟨ n ⟩ connected A)
-  (lB : has-level ⟨ 1 + n ⟩ B)
+  (lB : has-level ⟨ n *2 ⟩ B)
   (⊙g : ⊙Ω ⊙[ A , a ] ⊙→ ⊙Ω ⊙[ B , b ])
   where
-
-  lB' : has-level ⟨ n *2 ⟩ B
-  lB' = raise-level-≤T (lemma 0<n) lB
-    where private
-      lemma : ∀ {k : ℕ} →
-        0 < k → ⟨ S k ⟩ ≤T ⟨ k *2 ⟩
-      lemma ltS = inl idp
-      lemma {S k} (ltSR 0<k) = 
-        ⟨⟩-monotone-≤ (≤-ap-S (≤-ap-S (*2-increasing k)))
 
   private
     ⊙A = ⊙[ A , a ]
@@ -331,7 +322,7 @@ module is-contr-Ω-fiber
         (λ α → has-level-apply (
           lemma-1-0-3 _ _ _ _ _ _ 
           (snd cA a a) λ _ → has-level-apply 
-            (transport (λ m → has-level m B) (computation n) lB') 
+            (transport (λ m → has-level m B) (computation n) lB) 
             b b
         ) 
         (fold α h) ⊙g))
@@ -369,61 +360,20 @@ module is-contr-Ω-fiber
         → (y : B) (β : y == b)
         → is-contr (hfiber (to α y) β)
       is-contr-to-hfiber idp .b idp =
-        equiv-preserves-level (Σ-assoc ⁻¹)
-          {{has-level-in (ctr , λ{ (h , idp , h1=1) → eq h1=1 idp})}}
-        where private
-          lemma : {x : B} (ω : x == x) (H : ω == idp)
-            → !-inv-l ω ==
-              ap (λ p → ! p ∙ ω) H ∙ H
-          lemma .idp idp = idp
-
-          ctr : Σ (a == a → b == b) λ h
-              → (fold idp h == ⊙g)
-              × (h idp == idp)
-          ctr = g ,
-            ⊙λ= ((λ ω → ap (λ p → ! p ∙ g ω) g₀) ,
-                ↓-idf=cst-in ((lemma (g idp) g₀))) ,
-            g₀
-
-          eq : {h : a == a → b == b}
-            → (h1=1 : h idp == idp)
-            → (fold1h=⊙g : fold idp h == ⊙g)
-            → ctr == h , fold1h=⊙g , h1=1
-          eq {h} h1=1 idp = pair= 
-            (λ= H) 
-            (↓-×-in
-              (↓-app=cst-in (prop-path (has-level-apply is-set-⊙ΩA-⊙→-⊙ΩB _ _) _ _))
-              (↓-app=cst-in (lemma (h idp) h1=1 ∙ (ap (_∙ h1=1) (! (app=-β H idp))))))
-              where
-                H : g ~ h
-                H ω = ap (λ p → ! p ∙ h ω) h1=1
-
-                is-set-⊙ΩA-⊙→-⊙ΩB : is-set (⊙Ω ⊙A ⊙→ ⊙Ω ⊙B)
-                is-set-⊙ΩA-⊙→-⊙ΩB = lemma-1-0-3
-                  (a == a) (λ _ → b == b) 
-                  idp idp ⟨ n ⟩₋₂ ⟨ 0 ⟩ 
-                  ((snd cA) a a) 
-                  (λ ω → has-level-apply lB b b)
-
-                -- computation : 
-                --   ⊙λ= (
-                --     (λ ω → ap (λ p → ! p ∙ g ω) g₀) , 
-                --     ↓-idf=cst-in (lemma (g idp) g₀)
-                --   ) == ap (λ z → fold idp z) (λ= H)
-                -- computation =
-                --  ⊙λ= (
-                --     (λ ω → ap (λ p → ! p ∙ g ω) g₀) , 
-                --     ↓-idf=cst-in (lemma (g idp) g₀)
-                --   )
-                --     =⟨ idp ⟩
-                --   pair= (λ= P)
-                --     (↓-app=cst-in (↓-idf=cst-out α' ∙ ap (_∙ g₀) (! (app=-β P idp))))
-                --     =⟨ {!   !} ⟩
-                --   ap (λ z → fold idp z) (λ= H)
-                --     =∎
-                --   where private
-                --     P = (λ ω → ap (λ p → ! p ∙ g ω) g₀)
-                --     α' = ↓-idf=cst-in (lemma {x = b} (g idp) g₀)
+        equiv-preserves-level
+          (Σ₂-×-comm 
+          ∘e Σ-emap-r (
+            λ{ (h , h₀) → 
+              pre∙-equiv 
+              (lemma-1-0-4-2 
+                (is-homogeneous-Ω ⊙B) 
+                idp idp (fst (fold idp h)) h 
+                (λ= λ ω → ap (λ p → ! p ∙ h ω) h₀) 
+                (snd (fold idp h)) h₀) 
+              }
+            )
+          ) 
+          {{pathto-is-contr ⊙g}}
     
   is-contr-C : (x : A) → is-contr (C x)
   is-contr-C x = ∥⋅∥-rec is-contr-is-prop (λ p → transport _ p is-contr-Ca) (fst (snd cA a x))
@@ -449,7 +399,7 @@ module _
   {j} {⊙B : Ptd j}
   {n} (0<n : 0 < n)
   (cA : is ⟨ n ⟩ connected (de⊙ ⊙A))
-  (lB : has-level ⟨ 1 + n ⟩ (de⊙ ⊙B))
+  (lB : has-level ⟨ n *2 ⟩ (de⊙ ⊙B))
   where
 
   is-equiv-⊙Ω-fmap : 
