@@ -25,7 +25,7 @@ open import lib.types.Sigma
 open import lib.types.TLevel
 open import lib.types.Truncation
 
-module lib.EM-Spaces where
+module lib.Higher-torsor where
 
 -- As G-Torsor with G a group may be thought of G where
 -- the origin as been "removed" in the sens that every point

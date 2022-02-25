@@ -179,18 +179,6 @@ abstract
       , (λ e → pair= (λ= (λ _ → contr-path pB _))
                      (from-transp is-equiv _ (prop-path is-equiv-is-prop _ _))))
 
-{- Requires ua ! 
-instance
-  ≃-level : ∀ {i j} {n : ℕ₋₂} {A : Type i} {B : Type j}
-    → (has-level n A → has-level n B → has-level n (A ≃ B))
-  ≃-level {n = ⟨-2⟩} = ≃-contr
-  ≃-level {n = S n} pA pB = Σ-level ⟨⟩ ⟨⟩ where instance _ = pA; _ = pB
-
-  universe-=-level : ∀ {i} {n : ℕ₋₂} {A B : Type i}
-    → (has-level n A → has-level n B → has-level n (A == B))
-  universe-=-level pA pB = equiv-preserves-level ua-equiv where instance _ = pA; _ = pB
--}
-
 module _ {i} {n} where
   private
     prop : SubtypeProp {lsucc i} (Type i) i

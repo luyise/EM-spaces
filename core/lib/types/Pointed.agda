@@ -277,3 +277,19 @@ module _ {i j k} {X : Ptd i} {Y : Ptd j} {Z : Ptd k} (⊙e : X ⊙≃ Y) where
       ⊙Bool→-to-idf
 ⊙Bool→-equiv-idf-nat F = (comm-sqr λ _ → idp) ,
   snd (⊙Bool→-equiv-idf _) , snd (⊙Bool→-equiv-idf _)
+
+⊙==-Σ-== : ∀ {i} {A B : Type i} (a : A) (b : B) →
+  (⊙[ A , a ] == ⊙[ B , b ]) ≃ (Σ (A == B) (λ eq → coe eq a == b))
+⊙==-Σ-== {A = A} {B = B} a b = _ , is-eq to from to-from from-to
+  where private
+    to : (⊙[ A , a ] == ⊙[ B , b ]) → (Σ (A == B) (λ eq → coe eq a == b))
+    to eq = ap de⊙ eq , ⊙coe-pt eq
+
+    from : (Σ (A == B) (λ eq → coe eq a == b)) → (⊙[ A , a ] == ⊙[ B , b ])
+    from (idp , eq₀) = ap ⊙[ A ,_] eq₀
+
+    to-from : (e : Σ (A == B) (λ eq → coe eq a == b)) → to (from e) == e
+    to-from (idp , idp) = idp
+
+    from-to : (eq : ⊙[ A , a ] == ⊙[ B , b ]) → from (to eq) == eq
+    from-to idp = idp
