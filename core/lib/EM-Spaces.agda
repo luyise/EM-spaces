@@ -19,6 +19,7 @@ open import lib.PathGroupoid
 open import lib.PathOver
 open import lib.types.LoopSpace
 open import lib.types.Nat
+open import lib.types.Paths
 open import lib.types.Pointed
 open import lib.types.Sigma
 open import lib.types.TLevel
@@ -61,7 +62,7 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
   leq⊙B' x = transport (λ ⊙X → has-level n (⊙X == ⊙B)) (hB b x) leq⊙B
 
   Torsor : Type (lsucc i)
-  Torsor = 
+  Torsor =
     Σ (Type i) λ A 
       → (has-level (S n) A) 
       × (is n connected A)
@@ -159,7 +160,7 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
       result = lemma₁ lemma₂
  
   pointed-torsors-are-trivial :
-    (TA : Torsor) → (a : fst TA) 
+    (TA : Torsor) → (a : fst TA)
       → (TA , a) == (TB , b) :> Σ Torsor fst
   pointed-torsors-are-trivial =
     pointed-torsors-are-trivial-proof.result
@@ -177,36 +178,56 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
   -- is the same as giving an equality TB == TA,
   -- so we have an isomorphism between A and TB == TA
 
-  torsor-==-≃-space : (TA : Torsor) →
+  is-equiv-torsor-==-space : (TA : Torsor) →
     is-equiv (λ (u : TB == TA) → transport fst u b)
-  torsor-==-≃-space = fundamental-theorem-id _ b is-contr-ptd-torsor _
+  is-equiv-torsor-==-space = fundamental-theorem-id _ b is-contr-ptd-torsor _
+
+  torsor-==-≃-space : (TA : Torsor) →
+    (TB == TA) ≃ fst TA
+  torsor-==-≃-space TA = _ , is-equiv-torsor-==-space TA
 
   -- As a specific case, 
   -- one get the loop space of B-Torsor from the previous result
 
   torsor-loop-space : Ω ⊙[ Torsor , TB ] ≃ B
-  torsor-loop-space = _ , torsor-==-≃-space TB
+  torsor-loop-space = torsor-==-≃-space TB
 
   torsor-⊙loop-space : ⊙Ω ⊙[ Torsor , TB ] ⊙≃ ⊙B
-  torsor-⊙loop-space = 
+  torsor-⊙loop-space =
     (((λ (u : TB == TB) → transport fst u b)) , idp) , 
-    torsor-==-≃-space TB
-
-  -- We then show that the type of Torsor is a n-connected type
-
-  -- is-connected-torsor : is n connected Torsor
-  -- is-connected-torsor = {!   !}
+    is-equiv-torsor-==-space TB
 
   K = Torsor
-  ⊙K = ⊙[ Torsor , TB ]
+  ⊙K = ⊙[ K , TB ]
+
+-- We then show that the type of Torsor is a (S n)-connected type
+
+is-connected-torsor : ∀ {i} {n} (A : Type i)
+  (a : A) (lA : has-level (S n) A) (cA : is n connected A)
+  (hA : is-homogeneous A)
+  (leq⊙A : has-level n (⊙[ A , a ] == ⊙[ A , a ]))
+  → is (S n) connected (higher-torsor.K A a lA cA hA leq⊙A)
+is-connected-torsor {n = ⟨-2⟩} A a is-prop-A _ hA leq⊙A = 
+  [ higher-torsor.trivial-torsor A a is-prop-A _ hA leq⊙A ] , λ a₀ a₁ → lift unit
+is-connected-torsor {n = S n} A a lA cA hA leq⊙A = [ trivial-torsor ] ,
+  λ TA₀ TA₁ → ∥⋅∥-rec is-connected-is-prop
+    (λ a₁ → equiv-preserves-connectedness (fst (snd (snd TA₀))) 
+      (post∙-equiv (! (fst= (pointed-torsors-are-trivial TA₁ a₁))) 
+        ∘e !-equiv ∘e (torsor-==-≃-space TA₀) ⁻¹)) 
+    (fst (fst (snd (snd (TA₁)))))
+  where open higher-torsor A a lA cA hA leq⊙A
 
 -- we may now proove a universal property about
 -- the delooped space.
 
-module _ {i j : ULevel} {n : ℕ} (0<n : 0 < n)
-  (⊙A : Ptd i) (lA : has-level (⟨ S n ⟩) (de⊙ ⊙A)) (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
-  (⊙B : Ptd j) (lB : has-level (⟨ S n ⟩) (de⊙ ⊙B)) (cB : is (⟨ n ⟩) connected (de⊙ ⊙B))
-  (hA : is-homogeneous (de⊙ ⊙A)) (leq⊙A : has-level (⟨ n ⟩) (⊙A == ⊙A))
+module _ {i j : ULevel} (n : ℕ)
+  (⊙A : Ptd i) 
+  (lA : has-level (⟨ S n ⟩) (de⊙ ⊙A)) 
+  (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
+  (⊙B : Ptd j)
+  (lB : has-level (⟨ S (S n) ⟩) (de⊙ ⊙B))
+  (hA : is-homogeneous (de⊙ ⊙A)) 
+  (leq⊙A : has-level (⟨ n ⟩) (⊙A == ⊙A))
   where
 
   A = de⊙ ⊙A
@@ -214,15 +235,18 @@ module _ {i j : ULevel} {n : ℕ} (0<n : 0 < n)
 
   ⊙K = higher-torsor.⊙K A a lA cA hA leq⊙A
 
-  -- ⊙K-universal-property :
-  --   (⊙K ⊙→ ⊙B) ≃ (⊙A ⊙→ ⊙Ω ⊙B)
-  -- ⊙K-universal-property =
-  --   (⊙K ⊙→ ⊙B)
-  --     ≃⟨ Ω-equiv ⟩
-  --   {!   !}
-  --     ≃⟨ {!   !} ⟩
-  --   (⊙A ⊙→ ⊙Ω ⊙B)
-  --     ≃∎
-  --   where
-  --     Ω-equiv : (⊙K ⊙→ ⊙B) ≃ (⊙Ω ⊙K ⊙→ ⊙Ω ⊙B)
-  --     Ω-equiv = ⊙Ω-fmap , {! is-equiv-⊙Ω-fmap 0<n cA lB  !}
+  ⊙K-universal-property :
+    (⊙K ⊙→ ⊙B) ≃ (⊙A ⊙→ ⊙Ω ⊙B)
+  ⊙K-universal-property =
+    (⊙K ⊙→ ⊙B)
+      ≃⟨ Ω-equiv ⟩
+    (⊙Ω ⊙K ⊙→ ⊙Ω ⊙B)
+      ≃⟨ pre⊙∘-equiv ⊙A-⊙≃-⊙ΩK ⟩
+    (⊙A ⊙→ ⊙Ω ⊙B)
+      ≃∎
+    where
+      Ω-equiv : (⊙K ⊙→ ⊙B) ≃ (⊙Ω ⊙K ⊙→ ⊙Ω ⊙B)
+      Ω-equiv = ⊙Ω-fmap , is-equiv-⊙Ω-fmap (O<S n) (is-connected-torsor A a lA cA hA leq⊙A) lB
+
+      ⊙A-⊙≃-⊙ΩK : ⊙A ⊙≃ ⊙Ω ⊙K
+      ⊙A-⊙≃-⊙ΩK = (higher-torsor.torsor-⊙loop-space A a lA cA hA leq⊙A) ⊙⁻¹

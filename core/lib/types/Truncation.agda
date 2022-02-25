@@ -6,7 +6,10 @@ HoTT-Agda edited by Leclerc L. -}
 module lib.types.Truncation where
 
 open import lib.Base
+open import lib.Equivalence
+open import lib.Equivalence2
 open import lib.NType
+open import lib.types.Sigma
 
 {- Postulating the existence of a propositional truncation -}
 
@@ -40,3 +43,22 @@ module _ {i} where
   → X ⊙→ Y
   → ⊙Trunc X ⊙→ Y
 ⊙Trunc-rec {{is-prop-Y}} f = (Trunc-rec is-prop-Y (fst f) , [⋅]-β' (fst f) _ ∙ (snd f))
+
+is-equiv-∥⋅∥ : ∀ {i j} {X : Type i} {Y : Type j}
+  → {{is-prop-Y : is-prop Y}}
+  → {f : X → Y}
+  → is-equiv f 
+  → is-equiv (∥⋅∥-rec is-prop-Y f)
+is-equiv-∥⋅∥ {X = X} {Y = Y} {{is-prop-Y}} {f}
+  is-equiv-f = contr-map-is-equiv 
+    λ y → Σ-level 
+      (inhab-prop-is-contr [ is-equiv.g is-equiv-f y ] {{is-prop-∥⋅∥}}) 
+      λ x → has-level-apply is-prop-Y _ _
+
+≃-∥⋅∥ : ∀ {i j} {X : Type i} {Y : Type j}
+  → (X ≃ Y)
+  → (∥ X ∥ ≃ ∥ Y ∥)
+≃-∥⋅∥ {X = X} {Y = Y} (f , is-equiv-f) = 
+  (∥⋅∥-rec is-prop-∥⋅∥ ([_] ∘ f)) , 
+  is-eq _ ((∥⋅∥-rec is-prop-∥⋅∥ ([_] ∘ (is-equiv.g is-equiv-f)))) 
+  (λ _ → prop-path is-prop-∥⋅∥ _ _) (λ _ → prop-path is-prop-∥⋅∥ _ _)

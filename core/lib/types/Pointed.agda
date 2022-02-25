@@ -201,13 +201,11 @@ module _ {i} {X Y : Ptd i} where
   ⊙<–-inv-r-=⊙∘ : (⊙e : X ⊙≃ Y) → ⊙–> ⊙e ◃⊙∘ ⊙<– ⊙e ◃⊙idf =⊙∘ ⊙idf-seq
   ⊙<–-inv-r-=⊙∘ ⊙e = =⊙∘-in (⊙<–-inv-r ⊙e)
 
-{-
-
 module _ {i j k} {X : Ptd i} {Y : Ptd j} {Z : Ptd k} (⊙e : X ⊙≃ Y) where
 
   post⊙∘-is-equiv : is-equiv (λ (k : Z ⊙→ X) → ⊙–> ⊙e ⊙∘ k)
   post⊙∘-is-equiv = is-eq (⊙–> ⊙e ⊙∘_) (⊙<– ⊙e ⊙∘_) (to-from ⊙e) (from-to ⊙e) where
-    abstract
+    private
       to-from : ∀ {Y} (⊙e : X ⊙≃ Y) (k : Z ⊙→ Y) → ⊙–> ⊙e ⊙∘ (⊙<– ⊙e ⊙∘ k) == k
       to-from ((f , idp) , f-ise) (k , k-pt) = ⊙λ=' (f.f-g ∘ k) (↓-idf=cst-in' $ lemma k-pt)
         where
@@ -225,7 +223,7 @@ module _ {i j k} {X : Ptd i} {Y : Ptd j} {Z : Ptd k} (⊙e : X ⊙≃ Y) where
 
   pre⊙∘-is-equiv : is-equiv (λ (k : Y ⊙→ Z) → k ⊙∘ ⊙–> ⊙e)
   pre⊙∘-is-equiv = is-eq (_⊙∘ ⊙–> ⊙e) (_⊙∘ ⊙<– ⊙e) (to-from ⊙e) (from-to ⊙e) where
-    abstract
+    private
       to-from : ∀ {Z} (⊙e : X ⊙≃ Y) (k : X ⊙→ Z) → (k ⊙∘ ⊙<– ⊙e) ⊙∘ ⊙–> ⊙e == k
       to-from ((f , idp) , f-ise) (k , idp) = ⊙λ=' (ap k ∘ f.g-f) $ ↓-idf=cst-in' $ ∙-unit-r _
         where module f = is-equiv f-ise
@@ -237,8 +235,6 @@ module _ {i j k} {X : Ptd i} {Y : Ptd j} {Z : Ptd k} (⊙e : X ⊙≃ Y) where
 
   pre⊙∘-equiv : (Y ⊙→ Z) ≃ (X ⊙→ Z)
   pre⊙∘-equiv = _ , pre⊙∘-is-equiv
-
--}
 
 {- Pointed maps out of bool -}
 

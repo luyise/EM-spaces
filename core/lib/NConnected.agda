@@ -138,3 +138,15 @@ is-connected-is-prop : ∀ {i} {A : Type i} {n : ℕ₋₂}
 is-connected-is-prop {A = A} {⟨-2⟩} = equiv-preserves-level (lower-equiv ⁻¹)
 is-connected-is-prop {A = A} {S n} = ×-level is-prop-∥⋅∥ 
   (Π-level (λ _ → Π-level λ _ → is-connected-is-prop))
+
+equiv-preserves-connectedness :  
+  ∀ {i j} {A : Type i} {B : Type j} {n : ℕ₋₂}
+  → (is n connected A)
+  → (A ≃ B)
+  → (is n connected B)
+equiv-preserves-connectedness
+  {n = ⟨-2⟩} _ _ = lift unit
+equiv-preserves-connectedness {A = A} {B = B}
+  {n = S n} hA A≃B = ∥⋅∥-rec is-prop-∥⋅∥ ([_] ∘ –> A≃B) (fst hA) , 
+  λ b₀ b₁ → equiv-preserves-connectedness 
+  ((snd hA) (<– A≃B b₀) (<– A≃B b₁)) (ap-equiv (A≃B ⁻¹) b₀ b₁ ⁻¹)

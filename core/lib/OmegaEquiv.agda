@@ -294,8 +294,8 @@ module is-contr-Ω-fiber
     Σ (Σ (A → B) (λ f → f a == b))
        (λ ⊙f → ⊙Ω-fmap ⊙f == ⊙g)
       ≃⟨ Σ-assoc ⟩
-    ( Σ (A → B) λ f 
-    → Σ (f a == b) λ f₀ 
+    ( Σ (A → B) λ f
+    → Σ (f a == b) λ f₀
     → ⊙Ω-fmap (f , f₀) == ⊙g )
       ≃⟨ Σ-emap-r (λ f → Ω-fiber.Ω-fiber-equiv.FD-equiv a f ⊙g) ⟩
     ( Σ (A → B) λ f
@@ -318,7 +318,7 @@ module is-contr-Ω-fiber
       idp , idp , idp
 
   simplify-C : {x : A} (α₀ : x == a) 
-    → C x ≃ 
+    → C x ≃
     ( Σ B λ y
     → Σ (x == a → y == b) λ h
     → fold α₀ h == ⊙g )
@@ -354,21 +354,21 @@ module is-contr-Ω-fiber
 
   Cxy-pathto-equivalence : (x : A) (α : x == a) (y : B)
     → ( Σ (x == a → y == b) λ h
-      → (fold α h == ⊙g) ) 
+      → (fold α h == ⊙g) )
     ≃ ( y == b )
   Cxy-pathto-equivalence x α y = to α y , 
     contr-map-is-equiv λ β → is-contr-to-hfiber α y β
     where
       to : {x : A} (α : x == a) (y : B)
         → ( Σ (x == a → y == b) λ h
-            → (fold α h == ⊙g ) ) 
+            → (fold α h == ⊙g) )
         → ( y == b )
       to α y = λ{ (h , _) → h α }
 
-      is-contr-to-hfiber : {x : A} (α : x == a) 
+      is-contr-to-hfiber : {x : A} (α : x == a)
         → (y : B) (β : y == b)
         → is-contr (hfiber (to α y) β)
-      is-contr-to-hfiber idp .b idp = 
+      is-contr-to-hfiber idp .b idp =
         equiv-preserves-level (Σ-assoc ⁻¹)
           {{has-level-in (ctr , λ{ (h , idp , h1=1) → eq h1=1 idp})}}
         where private
@@ -378,11 +378,11 @@ module is-contr-Ω-fiber
           lemma .idp idp = idp
 
           ctr : Σ (a == a → b == b) λ h
-              → (fold idp h == ⊙g) 
+              → (fold idp h == ⊙g)
               × (h idp == idp)
-          ctr = g , 
+          ctr = g ,
             ⊙λ= ((λ ω → ap (λ p → ! p ∙ g ω) g₀) ,
-                ↓-idf=cst-in ((lemma (g idp) g₀))) , 
+                ↓-idf=cst-in ((lemma (g idp) g₀))) ,
             g₀
 
           eq : {h : a == a → b == b}
@@ -391,7 +391,7 @@ module is-contr-Ω-fiber
             → ctr == h , fold1h=⊙g , h1=1
           eq {h} h1=1 idp = pair= 
             (λ= H) 
-            (↓-×-in 
+            (↓-×-in
               (↓-app=cst-in (prop-path (has-level-apply is-set-⊙ΩA-⊙→-⊙ΩB _ _) _ _))
               (↓-app=cst-in (lemma (h idp) h1=1 ∙ (ap (_∙ h1=1) (! (app=-β H idp))))))
               where
@@ -455,4 +455,4 @@ module _
   is-equiv-⊙Ω-fmap : 
     is-equiv (⊙Ω-fmap :> (⊙A ⊙→ ⊙B → ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B))
   is-equiv-⊙Ω-fmap = contr-map-is-equiv
-    λ ⊙g → is-contr-Ω-fiber.is-contr-fiber 0<n cA lB ⊙g  
+    λ ⊙g → is-contr-Ω-fiber.is-contr-fiber 0<n cA lB ⊙g
