@@ -5,6 +5,7 @@ open import lib.PathGroupoid
 open import lib.PathFunctor
 open import lib.Equivalence
 open import lib.Equivalence2
+open import lib.Homogeneous
 open import lib.NType
 open import lib.NType2
 open import lib.PathOver
@@ -95,3 +96,12 @@ instance
   universe-=-level : ∀ {i} {n : ℕ₋₂} {A B : Type i}
     → (has-level n A → has-level n B → has-level n (A == B))
   universe-=-level pA pB = equiv-preserves-level ua-equiv {{≃-level pA pB}}
+
+{- Weakly homogeneous types are homogeneous -}
+
+is-weakly-homogeneous-is-homogeneous :
+  ∀ {i} {A : Type i}
+  → is-weakly-homogeneous A
+  → is-homogeneous A
+is-weakly-homogeneous-is-homogeneous {A = A} whA a₀ a₁ = 
+  ⊙ua (whA a₀ a₁) 

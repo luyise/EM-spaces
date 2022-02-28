@@ -264,3 +264,11 @@ O *2 = O
 ℕ-trichotomy (S m) (S n) | inl m=n = inl (ap S m=n)
 ℕ-trichotomy (S m) (S n) | inr (inl m<n) = inr (inl (<-ap-S m<n))
 ℕ-trichotomy (S m) (S n) | inr (inr m>n) = inr (inr (<-ap-S m>n))
+
+lvl : ℕ → ULevel
+lvl O = lzero
+lvl (S n) = lsucc (lvl n)
+
+lsucc^ : ℕ → ULevel → ULevel
+lsucc^ O = idf ULevel
+lsucc^ (S n) i = (lsucc^ n (lsucc i))

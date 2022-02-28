@@ -217,10 +217,23 @@ is-connected-torsor {n = S n} A a lA cA hA leq⊙A = [ trivial-torsor ] ,
     (fst (fst (snd (snd (TA₁)))))
   where open higher-torsor A a lA cA hA leq⊙A
 
+has-level-torsor : ∀ {i} {n} (A : Type i)
+  (a : A) (lA : has-level (S (S n)) A) (cA : is (S n) connected A)
+  (hA : is-homogeneous A)
+  (leq⊙A : has-level (S n) (⊙[ A , a ] == ⊙[ A , a ]))
+  → has-level (S (S (S n))) (higher-torsor.K A a lA cA hA leq⊙A)
+has-level-torsor {n = n} A a lA cA hA leq⊙A = 
+  has-level-in (λ TA₀ TA₁ → ∥⋅∥-rec has-level-is-prop 
+    (λ (a₁ : fst TA₁) → equiv-preserves-level 
+    ((post∙-equiv (! (fst= (pointed-torsors-are-trivial TA₁ a₁))) ∘e !-equiv ∘e (torsor-==-≃-space TA₀) ⁻¹)) 
+    {{(fst (snd TA₀))}}) 
+    (fst (fst (snd (snd (TA₁))))))
+  where open higher-torsor A a lA cA hA leq⊙A
+
 -- we may now proove a universal property about
 -- the delooped space.
 
-module _ {i j : ULevel} (n : ℕ)
+module universal-property {i j : ULevel} (n : ℕ)
   (⊙A : Ptd i) 
   (lA : has-level (⟨ S n ⟩) (de⊙ ⊙A)) 
   (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
