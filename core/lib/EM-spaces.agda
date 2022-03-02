@@ -207,6 +207,22 @@ private
             )
             ∙ (+-+2+ k (S (S (S (S (n *2))))))
 
+module _ {i : ULevel} {n : ℕ} (B : Type i)
+  (b : B) (lB : has-level (⟨ 1 + n ⟩) B) 
+  (cB : is (⟨ n ⟩) connected B)
+  (hB : is-homogeneous B)
+  where
+  
+  is-EM-space : ∀ (j : ULevel) (K : Type j) 
+    (k₀ : K) (k : ℕ)
+    (lK : has-level ⟨ 1 + k + (n *2) ⟩ K)
+    → Agda.Primitive.Setω
+  is-EM-space j K k₀ k lK =
+    ∀ {j'} (⊙A : Ptd j')
+    → (has-level ⟨ 1 + k + (n *2) ⟩ (de⊙ ⊙A))
+    → (⊙[ K , k₀ ] ⊙→ ⊙A) ≃ (⊙[ B , b ] ⊙→ ⊙Ω^ k ⊙A)
+
+
 module iterated-EM {i : ULevel} {n : ℕ} (B : Type i)
   (b : B) (lB : has-level (⟨ 1 + n ⟩) B) 
   (cB : is (⟨ n ⟩) connected B)
@@ -224,17 +240,43 @@ module iterated-EM {i : ULevel} {n : ℕ} (B : Type i)
     ⊙K-connected k = 
       iterated-K-connected B b lB cB hB k
 
-    ⊙K-level : 
+    ⊙K-level :
       (k : ℕ) → has-level ⟨ k + S n ⟩ K[ k ]
-    ⊙K-level k = 
+    ⊙K-level k =
       iterated-K-level B b lB cB hB k
 
     ⊙K-homogeneous :
       (k : ℕ) → is-homogeneous K[ k ]
     ⊙K-homogeneous = iterated-K-homogeneous B b lB cB hB
 
-  ⊙K-up : (k : ℕ) → ∀ {j} (⊙A : Ptd j)
-    → (has-level ⟨ 1 + k + (n *2) ⟩ (de⊙ ⊙A))
-    → (⊙K[ k ] ⊙→ ⊙A) ≃ (⊙[ B , b ] ⊙→ ⊙Ω^ k ⊙A)
-  ⊙K-up = iterated-⊙K-up B b lB cB hB
-  
+    ⊙K-up : (k : ℕ) → ∀ {j} (⊙A : Ptd j)
+      → (has-level ⟨ 1 + k + (n *2) ⟩ (de⊙ ⊙A))
+      → (⊙K[ k ] ⊙→ ⊙A) ≃ (⊙[ B , b ] ⊙→ ⊙Ω^ k ⊙A)
+    ⊙K-up = iterated-⊙K-up B b lB cB hB
+
+  is-EM-space-is-K :
+    ∀ {j} (K : Type j)
+    (k₀ : K) (k : ℕ)
+    (lK : has-level ⟨ 1 + k + (n *2) ⟩ K)
+    → (is-EM-space B b lB cB hB j K k₀ k lK)
+    → ⊙K[ k ] ⊙≃ ⊙[ K , k₀ ]
+  is-EM-space-is-K K k₀ k lK K-up = 
+    ⊙to , 
+    is-eq to from {!   !} {!   !}
+    where private
+      computation : ⟨ k + S n ⟩ ≤T ⟨ S (k + n *2) ⟩
+      computation = {!   !}
+
+      ⊙to : ⊙K[ k ] ⊙→ ⊙[ K , k₀ ]
+      ⊙to = is-equiv.g (snd (⊙K-up k ⊙[ K , k₀ ] lK)) ((–> (K-up ⊙[ K , k₀ ] lK)) (⊙idf _))
+
+      to : K[ k ] → K
+      to = fst ⊙to
+
+      from : K → K[ k ]
+      from = fst ((<– (K-up _ (raise-level-≤T computation (⊙K-level k)))) 
+        ((–> (⊙K-up k ⊙K[ k ] (raise-level-≤T computation (⊙K-level k)))) (⊙idf _)))
+
+      to-from : to ∘ from == x
+      to-from x = {!   !}
+   

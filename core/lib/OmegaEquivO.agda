@@ -30,10 +30,10 @@ open import lib.types.Sigma
 open import lib.groups.Homomorphism
 open import lib.groups.LoopSpace
 
-module lib.OmegaEquiv where
+module lib.OmegaEquivO where
 
-{- First, a result about Ω being an equivalence under
-  suitable assumptions -}
+{- a result about Ω being an equivalence under
+  suitable assumptions, in the case n = O -}
 
 -- Let (A , a) and (B , b) be two pointed types,
 -- such that A is a n-type n-1-connected,
@@ -48,10 +48,9 @@ private
     → (x == a)
     → {b y : B}
     → (h : x == a → y == b)
-    → ⊙Ω ⊙[ A , a ] ⊙→ ⊙Ω ⊙[ B , b ]
+    → Ω ⊙[ A , a ] → Ω ⊙[ B , b ]
   fold α h =
-    (λ ω → ! (h α) ∙ h (α ∙ ω)) ,
-    ap (λ γ → ! (h α) ∙ h γ) (∙=∙' α idp) ∙ !-inv-l (h α)
+    (λ ω → ! (h α) ∙ h (α ∙ ω))
 
 module Ω-fiber {i j} {A : Type i} {B : Type j} 
   (a : A) (f : A → B)
@@ -64,12 +63,12 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
   -- two definitions in order to
   -- shorten future statement
 
-  D : {b : B} (⊙g : ⊙ΩA ⊙→ ⊙Ω ⊙[ B , b ]) → Type (lmax i j)
-  D {b = b} ⊙g =
+  D : {b : B} (g : ΩA → Ω ⊙[ B , b ]) → Type (lmax i j)
+  D {b = b} g =
       (x : A)
     → Σ (x == a → f x == b) λ h 
     → (α : x == a)
-    → (fold α h) == ⊙g
+    → (fold α h) == g
 
   -- We now define a map induced on paths
   -- from a pointed map ⊙[ A , a ] ⊙→ ⊙[ B , b ] and
@@ -78,29 +77,33 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
   push : {b : B} {{f₀ : f a == b}} {x : A} → x == a → f x == b
   push {{f₀}} α = ap f α ∙' f₀
 
-  fold-is-⊙Ωf : {b : B} {{f₀ : f a == b}}
+  fold-is-Ωf : {b : B} {{f₀ : f a == b}}
     {x : A} (α : x == a)
-    → fold α push == ⊙Ω-fmap (f , f₀)
-  fold-is-⊙Ωf {{idp}} idp = idp
+    → fold α push == Ω-fmap (f , f₀)
+  fold-is-Ωf {{idp}} idp = idp
 
   fiber-lemma : {b : B} {{f₀ : f a == b}}
-    → D (⊙Ω-fmap (f , f₀))
+    → D (Ω-fmap (f , f₀))
   fiber-lemma {b} {{f₀ = p}} x = 
-    push , fold-is-⊙Ωf
+    push , fold-is-Ωf
 
   -- given a data of the previous form,
   -- we can reconstruct a pointed map
   -- ⊙[ A , a ] ⊙→ ⊙[ B , b ]
 
   module recover-pointed-map 
-    {b : B} {⊙g : ⊙ΩA ⊙→ ⊙Ω ⊙[ B , b ]}
-    (H : D ⊙g) 
+    {b : B} 
+    (lA : has-level ⟨ 1 ⟩ A)
+    (lB : has-level ⟨ 1 ⟩ B)
+    {mg : Ω^S-group O (⊙[ A , a ]) {{lA}} →ᴳ Ω^S-group O (⊙[ B , b ]) {{lB}}}
+    (H : D (GroupHom.f mg)) 
     where
 
-    private 
-      g = fst ⊙g
-      g₀ = snd ⊙g
+    private
       ⊙B = ⊙[ B , b ]
+      Ω-fmap-gp : ⊙A ⊙→ ⊙B → Ω^S-group O ⊙A {{lA}} →ᴳ Ω^S-group O ⊙B {{lB}}
+      Ω-fmap-gp = (Ω^S-group-fmap O {{lA}} {{lB}})
+      g = GroupHom.f mg
   
     f₀ : f a == b
     f₀ = fst (H a) idp
@@ -108,65 +111,66 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
     ⊙f : ⊙A ⊙→ ⊙B
     ⊙f = f , f₀
 
-    ⊙Ωf = ⊙Ω-fmap ⊙f
     Ωf = Ω-fmap ⊙f
 
     push-is-h : {x : A} (α : x == a)
       → push {{f₀}} α == fst (H x) α
     push-is-h idp = ∙'=∙ idp _
 
-    in-fiber-⊙f : ⊙Ω-fmap ⊙f == ⊙g
-    in-fiber-⊙f =
-      -- ⊙Ω-fmap ⊙f
-        ! (fold-is-⊙Ωf {{f₀}} idp)
-      -- fold idp (push {{f₀}})
-        ∙ ap (fold idp) (λ= push-is-h)
-      -- fold idp (fst (H a))
+    in-fiber-⊙f : Ω-fmap-gp ⊙f == mg
+    in-fiber-⊙f = group-hom= 
+      (
+        ! (fold-is-Ωf {{f₀}} idp) 
+        ∙ ap (fold idp) (λ= push-is-h) 
         ∙ snd (H a) idp
-      -- ⊙g =∎
+      )
 
   -- now we show that given f : A → B, 
-  -- a : A, b : B and ⊙g : ⊙ΩA → ⊙ΩB,
+  -- a : A, b : B and mg : ⊙ΩA → ⊙ΩB 
+  -- a group morphism,
   -- the two constructions defined
   -- above form an equivalence between
   --  [ Σ (f₀ : f a == b) 
-  --      (⊙Ω-fmap (f , f₀) == ⊙g) ]
-  -- and [ D ⊙g ].
+  --      (Ω-fmap-gp (f , f₀) == mg) ]
+  -- and [ D g ].
 
   module Ω-fiber-equiv {b : B} 
-    (⊙g : ⊙ΩA ⊙→ ⊙Ω ⊙[ B , b ])
+    (lA : has-level ⟨ 1 ⟩ A)
+    (lB : has-level ⟨ 1 ⟩ B)
+    (mg : Ω^S-group O (⊙[ A , a ]) {{lA}} →ᴳ Ω^S-group O (⊙[ B , b ]) {{lB}})
     where
-
-    F : Type (lmax i j)
-    F = Σ (f a == b) λ f₀
-        → (⊙Ω-fmap (f , f₀) == ⊙g)
 
     private
       ⊙B = ⊙[ B , b ]
       ⊙ΩB = ⊙Ω ⊙B
       ΩB = Ω ⊙B
-      g = fst ⊙g
-      g₀ = snd ⊙g
+      Ω-fmap-gp : ⊙A ⊙→ ⊙B → Ω^S-group O ⊙A {{lA}} →ᴳ Ω^S-group O ⊙B {{lB}}
+      Ω-fmap-gp = (Ω^S-group-fmap O {{lA}} {{lB}})
+      g = GroupHom.f mg
 
-    to : F → D ⊙g
+    F : Type (lmax i j)
+    F = Σ (f a == b) λ f₀
+        → (Ω-fmap-gp (f , f₀) == mg)
+
+    to : F → D g
     to φ x =
       push {{f₀}} , 
-      λ α → fold-is-⊙Ωf {{f₀}} α ∙ (snd φ)
+      λ α → fold-is-Ωf {{f₀}} α ∙ ap GroupHom.f (snd φ)
       where f₀ = fst φ
 
-    from : D ⊙g → F
+    from : D g → F
     from ψ = f₀ , in-fiber-⊙f
-      where open recover-pointed-map ψ
+      where open recover-pointed-map lA lB ψ
 
-    to-from : (ψ : D ⊙g) → to (from ψ) == ψ
+    to-from : (ψ : D g) → to (from ψ) == ψ
     to-from ψ =
       to (f₀ , in-fiber-⊙f)
         =⟨ idp ⟩
       (λ x → 
       ( push {{f₀}} 
-      , λ α → fold-is-⊙Ωf {{f₀}} α 
-            ∙ (in-fiber-⊙f)
-      )) :> D ⊙g
+      , λ α → fold-is-Ωf {{f₀}} α 
+            ∙ _
+      )) :> D g
         =⟨ λ= (λ x → pair= (eq-push-ψ x) (path-over x)) ⟩
       (λ x → fst (ψ x) , snd (ψ x))
         =⟨ idp ⟩
@@ -174,30 +178,41 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
         =∎
       where private
 
-        open recover-pointed-map ψ
+        open recover-pointed-map lA lB ψ
 
         eq-push-ψ : (x : A) → push {{f₀}} == fst (ψ x)
         eq-push-ψ x = λ= (λ α → push-is-h α)
         
-        path-over : (x : A) → PathOver 
-          (λ h → (α : x == a) → fold α h == ⊙g) 
-          (eq-push-ψ x)
-          (λ α → fold-is-⊙Ωf {{f₀}} α ∙ in-fiber-⊙f) (snd (ψ x))
+        path-over : (x : A) → 
+          PathOver (λ h → (α : x == a) → fold α h == g) (eq-push-ψ x)
+            (λ α →
+              fold-is-Ωf {{f₀}} α ∙
+              ap GroupHom.f (recover-pointed-map.in-fiber-⊙f lA lB ψ))
+            (snd (ψ x))
         path-over x = ↓-Π-cst-app-in 
           λ α → ↓-app=cst-in (eq α)
             where
               eq : {x : A} (α : x == a) →
-                fold-is-⊙Ωf {{f₀}} α ∙ in-fiber-⊙f ==
+                fold-is-Ωf {{f₀}} α ∙ 
+                ap GroupHom.f
+                (group-hom= (
+                  ! (fold-is-Ωf {{f₀}} idp) 
+                  ∙ ap (fold idp) (λ= push-is-h) 
+                  ∙ snd (ψ a) idp
+                ))
+                ==
                 ap (fold α) (λ= push-is-h) ∙ snd (ψ x) α
               eq idp =
-                (fold-is-⊙Ωf {{f₀}} idp) ∙ in-fiber-⊙f
-                  =⟨ ! (∙-assoc (fold-is-⊙Ωf {{f₀}} idp) _ _) ⟩
-                ((fold-is-⊙Ωf {{f₀}} idp)
-                  ∙ (! (fold-is-⊙Ωf {{f₀}} idp)))
+                (fold-is-Ωf {{f₀}} idp) ∙ _
+                  =⟨ ap ((fold-is-Ωf {{f₀}} idp) ∙_) (group-hom=-β _) ⟩
+                _
+                  =⟨ ! (∙-assoc (fold-is-Ωf {{f₀}} idp) _ _) ⟩
+                ((fold-is-Ωf {{f₀}} idp)
+                  ∙ (! (fold-is-Ωf {{f₀}} idp)))
                 ∙ (ap (fold idp) (λ= push-is-h)) 
                 ∙ (snd (ψ a) idp)
                   =⟨ ap (λ γ → γ ∙ (ap (fold idp) (λ= push-is-h)) ∙ (snd (ψ a) idp)) 
-                    (!-inv-r (fold-is-⊙Ωf {{f₀}} idp)) ⟩
+                    (!-inv-r (fold-is-Ωf {{f₀}} idp)) ⟩
                 (ap (fold idp) (λ= push-is-h)) 
                 ∙ (snd (ψ a) idp)
                   =∎
@@ -206,96 +221,85 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
     from-to φ =
       (f₀ , in-fiber-⊙f)
         =⟨ idp ⟩
-      (fst ((to φ) a) idp) ,
-      ! (fold-is-⊙Ωf {{f₀}} idp)
-      ∙ (ap (fold idp) (λ= push-is-h))
-      ∙ (snd ((to φ) a) idp)
-        =⟨ idp ⟩
       idp ∙' fst φ ,
-      ! (fold-is-⊙Ωf {{f₀}} idp)
-      ∙ (ap (fold idp) (λ= push-is-h))
-      ∙ (fold-is-⊙Ωf {{fst φ}} idp)
-      ∙ (snd φ)
-        =⟨ pair= (∙'-unit-l (fst φ)) path-over ⟩
+      group-hom= (
+        ! (fold-is-Ωf {{f₀}} idp)
+        ∙ (ap (fold idp) (λ= push-is-h))
+        ∙ (fold-is-Ωf {{fst φ}} idp)
+        ∙ (ap GroupHom.f (snd φ))
+      )
+        =⟨ pair= (∙'-unit-l (fst φ)) (↓-app=cst-in (eq (fst φ) (snd φ))) ⟩
       φ
         =∎
-      where private
+      where
 
         eq : {b' : B} (f₀' : f a == b')
-          {⊙g' : ⊙ΩA ⊙→ ⊙Ω ⊙[ B , b' ]}
-          (in-fib : ⊙Ω-fmap (f , f₀') == ⊙g')
-          → recover-pointed-map.in-fiber-⊙f 
-            (λ x → push {{f₀'}} , λ α → fold-is-⊙Ωf {{f₀'}} α ∙ in-fib) 
-            == ap (λ z → ⊙Ω-fmap (f , z)) 
+          {mg' : Ω^S-group O (⊙[ A , a ]) {{lA}} →ᴳ Ω^S-group O (⊙[ B , b' ]) {{lB}}}
+          (in-fib : (Ω^S-group-fmap O {{lA}} {{lB}}) (f , f₀') == mg')
+          → recover-pointed-map.in-fiber-⊙f lA lB
+            (λ x → push {{f₀'}} , λ α → fold-is-Ωf {{f₀'}} α ∙ (ap GroupHom.f in-fib)) 
+            == ap (λ z → (Ω^S-group-fmap O {{lA}} {{lB}}) (f , z)) 
             (∙'-unit-l f₀') ∙ in-fib
-        eq idp idp = ((∙-unit-r _) 
-          ∙ eq') 
+        eq idp idp =
+          (ap group-hom= (∙-unit-r _) 
+          ∙ eq')
           ∙ (∙-unit-r _)
           where
-            eq'' : {x : A} (α : x == a) → 
-              (recover-pointed-map.push-is-h
-              (λ x → ap f , (λ β → fold-is-⊙Ωf {{idp}} β ∙ idp)) α)
+            eq' : group-hom= (ap (fold idp)
+              (λ= (recover-pointed-map.push-is-h lA lB
+              (λ x → ap f , (λ α → fold-is-Ωf {{idp}} α ∙ idp)))))
               == idp
-            eq'' idp = idp
+            eq' = prop-path (has-level-apply GroupHom-level _ _) _ _
 
-            eq' : ap (fold idp)
-              (λ= (recover-pointed-map.push-is-h
-              (λ x → ap f , (λ α → fold-is-⊙Ωf {{idp}} α ∙ idp))))
-              == idp
-            eq' = ap (ap (fold idp)) (ap λ= (λ= λ α → eq'' α) ∙ ! (λ=-η idp))
+        open recover-pointed-map lA lB (to φ)
 
-        open recover-pointed-map (to φ)
-
-        path-over : PathOver 
-          (λ f₁ → ⊙Ω-fmap (f , f₁) == ⊙g) 
-          (∙'-unit-l (fst φ))
-          in-fiber-⊙f 
-          (snd φ)
-        path-over = ↓-app=cst-in (eq (fst φ) (snd φ))
-
-    FD-equiv : F ≃ D ⊙g
+    FD-equiv : F ≃ D g
     FD-equiv = equiv to from to-from from-to
 
 -- We now show that the fiber of Ω is contractible,
 -- so it will be an equivalence
 
-module is-contr-Ω-fiber 
+{-
+
+module is-contr-Ω-fiber-O 
   {i} {A : Type i} {a : A} 
   {j} {B : Type j} {b : B}
-  {n} (0<n : 0 < n)
-  (cA : is ⟨ n ⟩ connected A)
-  (lB : has-level ⟨ n *2 ⟩ B)
-  (⊙g : ⊙Ω ⊙[ A , a ] ⊙→ ⊙Ω ⊙[ B , b ])
+  (cA : is ⟨ O ⟩ connected A)
+  (lA : has-level ⟨ 1 ⟩ A)
+  (lB : has-level ⟨ 1 ⟩ B)
+  (mg : Ω^S-group O (⊙[ A , a ]) {{lA}} →ᴳ Ω^S-group O (⊙[ B , b ]) {{lB}})
   where
 
   private
     ⊙A = ⊙[ A , a ]
     ⊙B = ⊙[ B , b ]
+    ⊙g = GroupHom.⊙f mg
     g = fst ⊙g
-    g₀ = snd ⊙g
+    Ω-fmap-gp : ⊙A ⊙→ ⊙B → Ω^S-group O ⊙A {{lA}} →ᴳ Ω^S-group O ⊙B {{lB}}
+    Ω-fmap-gp = (Ω^S-group-fmap O {{lA}} {{lB}})
 
   C : (x : A) → Type (lmax i j)
   C x = 
       Σ B λ y
     → Σ (x == a → y == b) λ h
     → Π (x == a) λ α
-    → fold α h == ⊙g
+    → fst (fold α h) == g
 
   reformulating-Ω-fiber :
-    (hfiber ⊙Ω-fmap ⊙g) ≃ Π A C
-  reformulating-Ω-fiber = 
+    (hfiber Ω-fmap-gp mg) ≃ Π A C
+  reformulating-Ω-fiber =
     Σ (Σ (A → B) (λ f → f a == b))
-       (λ ⊙f → ⊙Ω-fmap ⊙f == ⊙g)
+       (λ ⊙f → Ω-fmap-gp ⊙f == mg)
       ≃⟨ Σ-assoc ⟩
     ( Σ (A → B) λ f
     → Σ (f a == b) λ f₀
-    → ⊙Ω-fmap (f , f₀) == ⊙g )
-      ≃⟨ Σ-emap-r (λ f → Ω-fiber.Ω-fiber-equiv.FD-equiv a f ⊙g) ⟩
+    → Ω-fmap-gp (f , f₀) == mg )
+      ≃⟨ Σ-emap-r (λ f → {!   !}) ⟩
     ( Σ (A → B) λ f
     → Π A λ x
     → Σ (x == a → f x == b) λ h
     → Π (x == a) λ α
-    → fold α h == ⊙g )
+    → fst (fold α h) == g )
       ≃⟨ choice ⁻¹ ⟩
     Π A C
       ≃∎
@@ -317,33 +321,7 @@ module is-contr-Ω-fiber
     → fold α₀ h == ⊙g )
   simplify-C α₀ = Σ-emap-r λ y
     → Σ-emap-r λ h
-    → (_ ,
-      lemma-1-0-2 _
-        (λ α → fold α h == ⊙g) α₀ 
-        ⟨ n ⟩₋₂ (snd cA _ a)
-        (λ α → has-level-apply (
-          lemma-1-0-3 _ _ _ _ _ _ 
-          (snd cA a a) λ _ → has-level-apply 
-            (transport (λ m → has-level m B) (computation n) lB) 
-            b b
-        ) 
-        (fold α h) ⊙g))
-    where private
-      computation : (k : ℕ) → ⟨ k *2 ⟩ == (S (S (⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂)))
-      computation 0 = idp
-      computation (S k) = 
-        ⟨ S (S (k *2)) ⟩
-          =⟨ idp ⟩
-        S (S ⟨ k *2 ⟩)
-          =⟨ ap (λ q → S (S q)) (computation k) ⟩
-        S (S (S (S (⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂))))
-          =⟨ idp ⟩
-        S (S (S (S ⟨ k ⟩₋₂ +2+ ⟨ k ⟩₋₂)))
-          =⟨ ap (λ q → S (S (S q))) (+2+-comm (S ⟨ k ⟩₋₂) ⟨ k ⟩₋₂) ⟩
-        S (S (S (⟨ k ⟩₋₂ +2+ S ⟨ k ⟩₋₂)))
-          =⟨ idp ⟩
-        (S (S (⟨ S k ⟩₋₂ +2+ ⟨ S k ⟩₋₂)))
-          =∎
+    → {!   !}
 
   Cxy-pathto-equivalence : (x : A) (α : x == a) (y : B)
     → ( Σ (x == a → y == b) λ h
@@ -363,10 +341,10 @@ module is-contr-Ω-fiber
         → is-contr (hfiber (to α y) β)
       is-contr-to-hfiber idp .b idp =
         equiv-preserves-level
-          (Σ₂-×-comm 
+          (Σ₂-×-comm
           ∘e Σ-emap-r (
             λ{ (h , h₀) → 
-              pre∙-equiv 
+              pre∙-equiv
               (lemma-1-0-4-2 
                 (is-homogeneous-Ω ⊙B) 
                 idp idp (fst (fold idp h)) h 
@@ -390,7 +368,7 @@ module is-contr-Ω-fiber
       is-contr-Ca = equiv-preserves-level (simplify-C idp ⁻¹ ∘e (Σ-emap-r (λ y → Cxy-pathto-equivalence a idp y ⁻¹)))
         {{ pathto-is-contr b }}
 
-  is-contr-fiber : is-contr (hfiber ⊙Ω-fmap ⊙g)
+  is-contr-fiber : is-contr (hfiber Ω-fmap-gp mg)
   is-contr-fiber = equiv-preserves-level (reformulating-Ω-fiber ⁻¹) 
     {{weak-λ= λ x → is-contr-C x}}
 
@@ -399,12 +377,18 @@ module is-contr-Ω-fiber
 module _ 
   {i} {⊙A : Ptd i}
   {j} {⊙B : Ptd j}
-  {n} (0<n : 0 < n)
-  (cA : is ⟨ n ⟩ connected (de⊙ ⊙A))
-  (lB : has-level ⟨ n *2 ⟩ (de⊙ ⊙B))
+  (cA : is ⟨ O ⟩ connected (de⊙ ⊙A))
+  (lA : has-level ⟨ 1 ⟩ (de⊙ ⊙A))
+  (lB : has-level ⟨ 1 ⟩ (de⊙ ⊙B))
   where
 
-  is-equiv-⊙Ω-fmap : 
-    is-equiv (⊙Ω-fmap :> (⊙A ⊙→ ⊙B → ⊙Ω ⊙A ⊙→ ⊙Ω ⊙B))
-  is-equiv-⊙Ω-fmap = contr-map-is-equiv
-    λ ⊙g → is-contr-Ω-fiber.is-contr-fiber 0<n cA lB ⊙g
+  private
+    Ω-fmap-gp : ⊙A ⊙→ ⊙B → Ω^S-group O ⊙A {{lA}} →ᴳ Ω^S-group O ⊙B {{lB}}
+    Ω-fmap-gp = (Ω^S-group-fmap O {{lA}} {{lB}})
+
+  is-equiv-Ω-fmap-gp : 
+    is-equiv Ω-fmap-gp
+  is-equiv-Ω-fmap-gp = contr-map-is-equiv
+    λ mg → is-contr-Ω-fiber-O.is-contr-fiber cA lA lB mg
+
+-}   

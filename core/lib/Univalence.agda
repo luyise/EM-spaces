@@ -104,4 +104,4 @@ is-weakly-homogeneous-is-homogeneous :
   → is-weakly-homogeneous A
   → is-homogeneous A
 is-weakly-homogeneous-is-homogeneous {A = A} whA a₀ a₁ = 
-  ⊙ua (whA a₀ a₁) 
+  ⊙ua (whA a₀ a₁)
