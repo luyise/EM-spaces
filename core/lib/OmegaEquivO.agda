@@ -302,35 +302,6 @@ module is-contr-Ω-fiber-O
     Π A C
       ≃∎
 
-  -- !-inv-l-nulhomotop-inversion : ∀ {i}
-  --   → {X : Type i} {x y : X} (α : y == x)
-  --   → (ω : x == x) (H : ω == idp)
-  --   → Σ (y == x) λ p
-  --   → Σ (! p ∙ p == ω) λ eq
-  --   → PathOver (_== idp) eq (!-inv-l p) H
-  -- !-inv-l-nulhomotop-inversion 
-  --   {x = x} {y = .x} idp idp idp = 
-  --     idp , idp , idp
-
-  -- simplify-C : {x : A} (α₀ : x == a) 
-  --   → C x ≃
-  --   ( Σ B λ y
-  --   → Σ (x == a → y == b) λ h
-  --   → fold α₀ h == g )
-  -- simplify-C α₀ = Σ-emap-r λ y
-  --   → Σ-emap-r λ h
-  --   → (_ ,
-  --     lemma-1-0-2 _
-  --       (λ α → fold α h == g) α₀ 
-  --       ⟨-2⟩ (snd cA _ a)
-  --       (λ α → has-level-apply (
-  --         lemma-1-0-3 _ _ _ _ _ _ 
-  --         (snd cA a a) λ _ → has-level-apply 
-  --           (transport (λ m → has-level m B) ? lB) 
-  --           b b
-  --       ) 
-  --       (fold α h) mg))
-
   Cxy-pathto-equivalence : (x : A)
     → (x == a) 
     → (y : B)

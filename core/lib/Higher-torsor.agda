@@ -51,15 +51,17 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
     norm-hB b₀ b₀ == idp
   normalised-norm-hB b₀ = !-inv-l (hB b₀ b₀)
 
-  ⊙B = ⊙[ B , b ]
+  private
+    ⊙B = ⊙[ B , b ]
 
   -- and we show that the hypothesis leq⊙B implies a stronger
   -- properties, thanks to the homogeneity of B.
   -- If n ≥ 0, we may use the n-connectedness of B to show this,
   -- maybe we could also derive it from weak-homogeneity of B.
   
-  leq⊙B' : (x : B) → has-level n (⊙[ B , x ] == ⊙B)
-  leq⊙B' x = transport (λ ⊙X → has-level n (⊙X == ⊙B)) (hB b x) leq⊙B
+  private
+    leq⊙B' : (x : B) → has-level n (⊙[ B , x ] == ⊙B)
+    leq⊙B' x = transport (λ ⊙X → has-level n (⊙X == ⊙B)) (hB b x) leq⊙B
 
   Torsor : Type (lsucc i)
   Torsor =
@@ -263,3 +265,38 @@ module universal-property {i j : ULevel} (n : ℕ)
 
       ⊙A-⊙≃-⊙ΩK : ⊙A ⊙≃ ⊙Ω ⊙K
       ⊙A-⊙≃-⊙ΩK = (higher-torsor.torsor-⊙loop-space A a lA cA hA leq⊙A) ⊙⁻¹
+
+-- Now we show that the type of ⊙Ω ⊙B - Torsors is
+-- isomorphic to the type ⊙B
+
+module loopspace-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
+  (b : B) (lB : has-level (S (S n)) B) (cB : is (S n) connected B)
+  (leq⊙ΩB : has-level n (⊙Ω ⊙[ B , b ] == ⊙Ω ⊙[ B , b ]))
+  where
+
+  private
+    ⊙B = ⊙[ B , b ]
+    ⊙ΩB = ⊙Ω ⊙B
+    ΩB = Ω ⊙B
+
+    lΩB : has-level (S n) ΩB
+    lΩB = has-level-apply lB b b
+
+    cΩB : is n connected ΩB
+    cΩB = (snd cB) b b
+
+    hΩB : is-homogeneous ΩB
+    hΩB = is-homogeneous-Ω ⊙B
+
+  open higher-torsor ΩB idp lΩB cΩB hΩB leq⊙ΩB
+
+  -- path-torsor : {y : B} (α : y == b) → Torsor
+  -- path-torsor {y} α = (y == b) ,
+  --   has-level-apply lB y b , (snd cB) y b ,
+  --   {!   !}
+
+  -- private
+  --   ⊙Torsor = ⊙[ Torsor , trivial-torsor ]
+
+  -- loopspace-torsor : ⊙B ⊙≃ ⊙Torsor
+  -- loopspace-torsor = {!   !} , is-eq {!   !} {!   !} {!   !} {!   !}
