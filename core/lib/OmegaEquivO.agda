@@ -259,8 +259,6 @@ module Ω-fiber {i j} {A : Type i} {B : Type j}
 -- We now show that the fiber of Ω is contractible,
 -- so it will be an equivalence
 
-{-
-
 module is-contr-Ω-fiber-O 
   {i} {A : Type i} {a : A} 
   {j} {B : Type j} {b : B}
@@ -283,7 +281,7 @@ module is-contr-Ω-fiber-O
       Σ B λ y
     → Σ (x == a → y == b) λ h
     → Π (x == a) λ α
-    → fst (fold α h) == g
+    → fold α h == g
 
   reformulating-Ω-fiber :
     (hfiber Ω-fmap-gp mg) ≃ Π A C
@@ -294,66 +292,114 @@ module is-contr-Ω-fiber-O
     ( Σ (A → B) λ f
     → Σ (f a == b) λ f₀
     → Ω-fmap-gp (f , f₀) == mg )
-      ≃⟨ Σ-emap-r (λ f → {!   !}) ⟩
+      ≃⟨ Σ-emap-r (λ f → Ω-fiber.Ω-fiber-equiv.FD-equiv a f lA lB mg) ⟩
     ( Σ (A → B) λ f
     → Π A λ x
     → Σ (x == a → f x == b) λ h
     → Π (x == a) λ α
-    → fst (fold α h) == g )
+    → fold α h == g )
       ≃⟨ choice ⁻¹ ⟩
     Π A C
       ≃∎
 
-  !-inv-l-nulhomotop-inversion : ∀ {i}
-    → {X : Type i} {x y : X} (α : y == x)
-    → (ω : x == x) (H : ω == idp)
-    → Σ (y == x) λ p
-    → Σ (! p ∙ p == ω) λ eq
-    → PathOver (_== idp) eq (!-inv-l p) H
-  !-inv-l-nulhomotop-inversion 
-    {x = x} {y = .x} idp idp idp = 
-      idp , idp , idp
+  -- !-inv-l-nulhomotop-inversion : ∀ {i}
+  --   → {X : Type i} {x y : X} (α : y == x)
+  --   → (ω : x == x) (H : ω == idp)
+  --   → Σ (y == x) λ p
+  --   → Σ (! p ∙ p == ω) λ eq
+  --   → PathOver (_== idp) eq (!-inv-l p) H
+  -- !-inv-l-nulhomotop-inversion 
+  --   {x = x} {y = .x} idp idp idp = 
+  --     idp , idp , idp
 
-  simplify-C : {x : A} (α₀ : x == a) 
-    → C x ≃
-    ( Σ B λ y
-    → Σ (x == a → y == b) λ h
-    → fold α₀ h == ⊙g )
-  simplify-C α₀ = Σ-emap-r λ y
-    → Σ-emap-r λ h
-    → {!   !}
+  -- simplify-C : {x : A} (α₀ : x == a) 
+  --   → C x ≃
+  --   ( Σ B λ y
+  --   → Σ (x == a → y == b) λ h
+  --   → fold α₀ h == g )
+  -- simplify-C α₀ = Σ-emap-r λ y
+  --   → Σ-emap-r λ h
+  --   → (_ ,
+  --     lemma-1-0-2 _
+  --       (λ α → fold α h == g) α₀ 
+  --       ⟨-2⟩ (snd cA _ a)
+  --       (λ α → has-level-apply (
+  --         lemma-1-0-3 _ _ _ _ _ _ 
+  --         (snd cA a a) λ _ → has-level-apply 
+  --           (transport (λ m → has-level m B) ? lB) 
+  --           b b
+  --       ) 
+  --       (fold α h) mg))
 
-  Cxy-pathto-equivalence : (x : A) (α : x == a) (y : B)
+  Cxy-pathto-equivalence : (x : A)
+    → (x == a) 
+    → (y : B)
     → ( Σ (x == a → y == b) λ h
-      → (fold α h == ⊙g) )
-    ≃ ( y == b )
-  Cxy-pathto-equivalence x α y = to α y , 
-    contr-map-is-equiv λ β → is-contr-to-hfiber α y β
+        → Π (x == a) λ α
+        → fold α h == g ) 
+      ≃ ( y == b )
+  Cxy-pathto-equivalence x α₀ y = 
+    _ , is-eq (to α₀ y) from to-from from-to
     where
-      to : {x : A} (α : x == a) (y : B)
+      to : {x : A} → (x == a) → (y : B)
         → ( Σ (x == a → y == b) λ h
-            → (fold α h == ⊙g) )
+          → Π (x == a) λ α
+          → fold α h == g ) 
         → ( y == b )
       to α y = λ{ (h , _) → h α }
 
-      is-contr-to-hfiber : {x : A} (α : x == a)
-        → (y : B) (β : y == b)
-        → is-contr (hfiber (to α y) β)
-      is-contr-to-hfiber idp .b idp =
-        equiv-preserves-level
-          (Σ₂-×-comm
-          ∘e Σ-emap-r (
-            λ{ (h , h₀) → 
-              pre∙-equiv
-              (lemma-1-0-4-2 
-                (is-homogeneous-Ω ⊙B) 
-                idp idp (fst (fold idp h)) h 
-                (λ= λ ω → ap (λ p → ! p ∙ h ω) h₀) 
-                (snd (fold idp h)) h₀) 
-              }
-            )
-          ) 
-          {{pathto-is-contr ⊙g}}
+      from : {y : B} → (y == b)
+        → ( Σ (x == a → y == b) λ h
+          → Π (x == a) λ α
+          → fold α h == g )
+      from {y = y} β = 
+        (λ α → β ∙ (g (! α₀ ∙ α))) , 
+        λ { idp → λ= (eq α₀ β)}
+          where
+            eq :
+                (α₀ : a == a) 
+              → {y : B} → (β : y == b)
+              → (ω : a == a)
+              → ! (β ∙ g (! α₀ ∙ idp)) ∙ β ∙ (g (! α₀ ∙ ω))
+                == g ω
+            eq α₀ idp ω = 
+              ! (g (! α₀ ∙ idp)) ∙ g (! α₀ ∙ ω)
+                =⟨ ap (λ δ → ! (g δ) ∙ g (! α₀ ∙ ω)) (∙-unit-r (! α₀)) ⟩
+              ! (g (! α₀)) ∙ g (! α₀ ∙ ω)
+                =⟨ ap ((! (g (! α₀))) ∙_) (GroupHom.pres-comp mg (! α₀) ω) ⟩
+              ! (g (! α₀)) ∙ g (! α₀) ∙ g ω
+                =⟨ ! (∙-assoc (! (g (! α₀))) (g (! α₀)) (g ω)) ⟩
+              (! (g (! α₀)) ∙ g (! α₀)) ∙ g ω
+                =⟨ ap (_∙ g ω) (!-inv-l (g (! α₀))) ⟩
+              g ω
+                =∎
+
+      to-from : {y : B} (β : y == b) → to α₀ y (from β) == β
+      to-from idp = ap g (!-inv-l α₀) ∙ GroupHom.pres-ident mg
+
+      from-to :
+        (H : Σ (x == a → y == b) (λ h → Π (x == a) (λ α → fold α h == g))) →
+          from (to α₀ y H) == H
+      from-to (h , heq) = pair= 
+        (λ= eq) 
+        ( ↓-Π-cst-app-in λ{ idp → ↓-app=cst-in 
+          (prop-path (
+            has-level-apply (
+              Π-level λ ω → 
+                has-level-apply lB _ _
+              ) _ _
+            ) _ _
+          )} 
+        )
+        where
+          eq : (α : x == a) 
+            → (h α₀ ∙ g (! α₀ ∙ α) == h α)
+          eq α = 
+            ap ((h α₀) ∙_) (! (app= (heq α₀) (! α₀ ∙ α))) 
+            ∙ ! (∙-assoc (h α₀) (! (h α₀)) (h (α₀ ∙ ! α₀ ∙ α))) 
+            ∙ ap (_∙ (h (α₀ ∙ ! α₀ ∙ α))) (!-inv-r (h α₀)) 
+            ∙ ap h (! (∙-assoc α₀ (! α₀) α)) 
+            ∙ ap (λ ω → h (ω ∙ α)) (!-inv-r α₀)
     
   is-contr-C : (x : A) → is-contr (C x)
   is-contr-C x = ∥⋅∥-rec is-contr-is-prop (λ p → transport _ p is-contr-Ca) (fst (snd cA a x))
@@ -365,7 +411,7 @@ module is-contr-Ω-fiber-O
         lemma .idp idp = idp
 
       is-contr-Ca : is-contr (C a)
-      is-contr-Ca = equiv-preserves-level (simplify-C idp ⁻¹ ∘e (Σ-emap-r (λ y → Cxy-pathto-equivalence a idp y ⁻¹)))
+      is-contr-Ca = equiv-preserves-level (Σ-emap-r (λ y → Cxy-pathto-equivalence a idp y ⁻¹))
         {{ pathto-is-contr b }}
 
   is-contr-fiber : is-contr (hfiber Ω-fmap-gp mg)
@@ -390,5 +436,4 @@ module _
     is-equiv Ω-fmap-gp
   is-equiv-Ω-fmap-gp = contr-map-is-equiv
     λ mg → is-contr-Ω-fiber-O.is-contr-fiber cA lA lB mg
-
--}   
+    
