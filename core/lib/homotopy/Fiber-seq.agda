@@ -120,15 +120,6 @@ module exact-seq {i : ULevel}
     is-fibration : Type i
     is-fibration = is-equiv canonical-map
 
-    -- is-fibration : Type (lsucc i)
-    -- is-fibration =
-    --   (⊙A , ⊙f) 
-    --     == 
-    --   (( ⊙[ Σ B (λ y → g y == c) , (b , g₀) ] 
-    --   , (fst , idp) )
-    --     :> Σ (Ptd i) (λ ⊙X → (⊙X ⊙→ ⊙B))
-    --   )
-
   -- then we may show that the group sequence induced on path space is left-exact
 
   module _
@@ -226,6 +217,8 @@ module exact-seq {i : ULevel}
           =⟨ !-inv-r g₀ ⟩
         idp
           =∎
+
+    -- and the same property shows that the sequence is left exact
 
     private
       ker-g-to-ΩΣ : (β : ΩB) → (Ωg β == idp)
