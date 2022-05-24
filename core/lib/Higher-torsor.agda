@@ -36,14 +36,14 @@ module lib.Higher-torsor where
 
 module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
   (b : B) (lB : has-level (S n) B) (cB : is n connected B)
-  (hB : is-homogeneous B)
+  (hB : homogeneous-struct B)
   (leq⊙B : has-level n (⊙[ B , b ] == ⊙[ B , b ]))
   where
 
   -- We begin by introducing a better behaved familly of equality over B,
   -- so that norm-hB b₀ b₀ == idp
 
-  norm-hB : is-homogeneous B
+  norm-hB : homogeneous-struct B
   norm-hB =
     λ b₀ b₁ → ! (hB b₀ b₀) ∙ (hB b₀ b₁)
 
@@ -74,7 +74,7 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
   chart-of (_ , _ , _ , chart) at a = chart a
 
   torsors-are-homogeneous :
-    (TA : Torsor) → is-homogeneous (fst TA)
+    (TA : Torsor) → homogeneous-struct (fst TA)
   torsors-are-homogeneous TA a₀ a₁ =
     (chart-of TA at a₀) ∙ ! (chart-of TA at a₁) 
 
@@ -206,7 +206,7 @@ module higher-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
 
 is-connected-torsor : ∀ {i} {n} (A : Type i)
   (a : A) (lA : has-level (S n) A) (cA : is n connected A)
-  (hA : is-homogeneous A)
+  (hA : homogeneous-struct A)
   (leq⊙A : has-level n (⊙[ A , a ] == ⊙[ A , a ]))
   → is (S n) connected (higher-torsor.K A a lA cA hA leq⊙A)
 is-connected-torsor {n = ⟨-2⟩} A a is-prop-A _ hA leq⊙A = 
@@ -221,7 +221,7 @@ is-connected-torsor {n = S n} A a lA cA hA leq⊙A = [ trivial-torsor ] ,
 
 has-level-torsor : ∀ {i} {n} (A : Type i)
   (a : A) (lA : has-level (S (S n)) A) (cA : is (S n) connected A)
-  (hA : is-homogeneous A)
+  (hA : homogeneous-struct A)
   (leq⊙A : has-level (S n) (⊙[ A , a ] == ⊙[ A , a ]))
   → has-level (S (S (S n))) (higher-torsor.K A a lA cA hA leq⊙A)
 has-level-torsor {n = n} A a lA cA hA leq⊙A = 
@@ -241,7 +241,7 @@ module universal-property {i j : ULevel} (n : ℕ)
   (cA : is (⟨ n ⟩) connected (de⊙ ⊙A))
   (⊙B : Ptd j)
   (lB : has-level (⟨ (S n) *2 ⟩) (de⊙ ⊙B))
-  (hA : is-homogeneous (de⊙ ⊙A))
+  (hA : homogeneous-struct (de⊙ ⊙A))
   (leq⊙A : has-level (⟨ n ⟩) (⊙A == ⊙A))
   where
 
@@ -285,8 +285,8 @@ module loopspace-torsor {i : ULevel} {n : ℕ₋₂} (B : Type i)
     cΩB : is n connected ΩB
     cΩB = (snd cB) b b
 
-    hΩB : is-homogeneous ΩB
-    hΩB = is-homogeneous-Ω ⊙B
+    hΩB : homogeneous-struct ΩB
+    hΩB = homogeneous-struct-Ω ⊙B
 
   open higher-torsor ΩB idp lΩB cΩB hΩB leq⊙ΩB
 

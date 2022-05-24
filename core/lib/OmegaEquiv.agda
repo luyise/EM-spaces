@@ -368,7 +368,7 @@ module is-contr-Ω-fiber
             λ{ (h , h₀) → 
               pre∙-equiv 
               (lemma-1-0-4-2 
-                (is-homogeneous-Ω ⊙B) 
+                (homogeneous-struct-Ω ⊙B) 
                 idp idp (fst (fold idp h)) h 
                 (λ= λ ω → ap (λ p → ! p ∙ h ω) h₀) 
                 (snd (fold idp h)) h₀) 

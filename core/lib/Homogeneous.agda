@@ -27,11 +27,11 @@ module lib.Homogeneous where
 
 {- Definition of homogeneous types -}
 
-is-homogeneous : ∀ {i} (A : Type i) → Type (lsucc i)
-is-homogeneous A = (a₀ a₁ : A) → ⊙[ A , a₀ ] == ⊙[ A , a₁ ]
+homogeneous-struct : ∀ {i} (A : Type i) → Type (lsucc i)
+homogeneous-struct A = (a₀ a₁ : A) → ⊙[ A , a₀ ] == ⊙[ A , a₁ ]
 
-is-homogeneous-Ω : ∀ {i} (A : Ptd i) → is-homogeneous (Ω A)
-is-homogeneous-Ω A p q = 
+homogeneous-struct-Ω : ∀ {i} (A : Ptd i) → homogeneous-struct (Ω A)
+homogeneous-struct-Ω A p q = 
   (! (lemma (de⊙ A) (pt A) (pt A) p)) 
   ∙ (lemma (de⊙ A) (pt A) (pt A) q)
   where private
@@ -48,13 +48,13 @@ lemma-1-0-4-0 : ∀ {i j} {A : Type i} (B : Type j)
 lemma-1-0-4-0 B a₀ .a₀ idp b = idp
 
 lemma-1-0-4-1 : ∀ {i} {A : Type i}
-  → (hA : is-homogeneous A)
+  → (hA : homogeneous-struct A)
   → (a₀ a₁ : A) (p : a₀ == a₁)
-  → ap ⊙[ A ,_] p == ! (hA a₀ a₀) ∙ (hA a₀ a₁) 
+  → ap ⊙[ A ,_] p == ! (hA a₀ a₀) ∙ (hA a₀ a₁)
 lemma-1-0-4-1 {A = A} hA a₀ .a₀ idp = ! (!-inv-l (hA a₀ a₀))
 
 lemma-1-0-4-2 : ∀ {i} {A : Type i}
-  → is-homogeneous A
+  → homogeneous-struct A
   → ∀ (a₀ : A) {j} {X : Type j} (x₀ : X) (f g : X → A)
   → (f == g)
   → ∀ (f₀ : f x₀ == a₀) (g₀ : g x₀ == a₀)
@@ -87,7 +87,7 @@ lemma-1-0-4-2 {A = A} hA .(f x₀) {X = X} x₀ f .f idp idp g₀ = equality
 
 fun-to-homogeneous :
   ∀ {i j} (A : Type i) (B : Type j) (a : A) (b : B)
-  → (is-homogeneous B)
+  → (homogeneous-struct B)
   → (A → B) ≃ B × (⊙[ A , a ] ⊙→ ⊙[ B , b ])
 fun-to-homogeneous A B a b hB = _ , is-eq to from to-from from-to
   where
@@ -127,36 +127,36 @@ fun-to-homogeneous A B a b hB = _ , is-eq to from to-from from-to
 
 {- Defining a weaker notion, maybe useful without ua -}
 
-is-weakly-homogeneous : ∀ {i} (A : Type i) → Type i
-is-weakly-homogeneous A = (a₀ a₁ : A) → ⊙[ A , a₀ ] ⊙≃ ⊙[ A , a₁ ]
+weak-homogeneous-struct : ∀ {i} (A : Type i) → Type i
+weak-homogeneous-struct A = (a₀ a₁ : A) → ⊙[ A , a₀ ] ⊙≃ ⊙[ A , a₁ ]
 
-is-homogeneous-is-weakly-homogeneous :
+homogeneous-struct-weak-homogeneous-struct :
   ∀ {i} {A : Type i}
-  → (is-homogeneous A) 
-  → is-weakly-homogeneous A
-is-homogeneous-is-weakly-homogeneous {A = A} hA a₀ a₁ =
+  → (homogeneous-struct A) 
+  → weak-homogeneous-struct A
+homogeneous-struct-weak-homogeneous-struct {A = A} hA a₀ a₁ =
   transport (λ ⊙X → ⊙[ A , a₀ ] ⊙≃ ⊙X) (hA a₀ a₁) (⊙ide _)
 
-is-weakly-homogeneous-Ω : ∀ {i} (A : Ptd i) → is-weakly-homogeneous (Ω A)
-is-weakly-homogeneous-Ω = is-homogeneous-is-weakly-homogeneous ∘ is-homogeneous-Ω
+weak-homogeneous-struct-Ω : ∀ {i} (A : Ptd i) → weak-homogeneous-struct (Ω A)
+weak-homogeneous-struct-Ω = homogeneous-struct-weak-homogeneous-struct ∘ homogeneous-struct-Ω
 
-is-weakly-homogeneous-n-connected-Sn-type :
+weak-homogeneous-struct-n-connected-Sn-type :
   ∀ {i} {A : Type i} {n : ℕ} (0<n : 0 < n)
   → (is (⟨ n ⟩) connected A)
   → (has-level (S ⟨ n ⟩) A)
-  → is-weakly-homogeneous A
-is-weakly-homogeneous-n-connected-Sn-type {A = A} {n} (ltS) cA lA a = 
+  → weak-homogeneous-struct A
+weak-homogeneous-struct-n-connected-Sn-type {A = A} {n} (ltS) cA lA a = 
   is-equiv.g (lemma-1-0-2 A 
     (λ (x : A) → ⊙[ A , a ] ⊙≃ ⊙[ A , x ])
     a ⟨ 0 ⟩ cA (λ x → is-set-⊙≃-n-connected-Sn-type cA lA a x)) 
     (⊙ide _)
-is-weakly-homogeneous-n-connected-Sn-type {A = A} {n = _} (ltSR k) cA lA a = 
+weak-homogeneous-struct-n-connected-Sn-type {A = A} {n = _} (ltSR k) cA lA a = 
   is-equiv.g (lemma-1-0-2 A 
     (λ (x : A) → ⊙[ A , a ] ⊙≃ ⊙[ A , x ])
     a ⟨ 0 ⟩ (is-<T-connected (<T-ap-S (⟨⟩-monotone-< k)) cA) (λ x → is-set-⊙≃-n-connected-Sn-type cA lA a x)) 
     (⊙ide _)
 
-ℤ-weakly-homogeneous : is-weakly-homogeneous ℤ
+ℤ-weakly-homogeneous : weak-homogeneous-struct ℤ
 ℤ-weakly-homogeneous m n = ((λ k → (k ℤ+ ℤ~ m) ℤ+ n) , computation₁ m n) , 
   is-eq _ ((λ k → (k ℤ+ ℤ~ n) ℤ+ m)) (computation₂ m n) (computation₂ n m)
   where abstract
@@ -185,3 +185,50 @@ is-weakly-homogeneous-n-connected-Sn-type {A = A} {n = _} (ltSR k) cA lA a =
         =⟨ ℤ+-unit-r k ⟩
       k
         =∎
+
+coe-Ω-⊙[-,-] :
+    ∀ {i} {A : Type i} {a₀ a₁ : A} 
+  → (q : a₀ == a₁)
+  → (p : a₀ == a₀)
+  → coe (ap (Ω ∘ ⊙[ A ,_]) q) p == ! q ∙ p ∙' q
+coe-Ω-⊙[-,-] idp p = idp
+
+homogeneous→abelian :
+    ∀ {i} {A : Type i}
+  → homogeneous-struct A
+  → (a₀ : A)
+  → (p q : a₀ == a₀)
+  → p ∙ q == q ∙ p
+homogeneous→abelian {A = A} hA a₀ p q =
+  ! (∙'=∙ p q) ∙ 
+  (–>-is-inj (pre∙-equiv (! q))) _ _ (! (coe-Ω-⊙[-,-] q p) 
+  ∙ ((ap (λ u → coe u p) (ap-∘ Ω ⊙[ A ,_] q ∙ ap (ap Ω) (lemma-1-0-4-1 hA _ _ q ∙ !-inv-l (hA a₀ a₀)))) 
+  ∙ (ap (_∙ p) (! (!-inv-l q)))) 
+  ∙ (∙-assoc (! q) q p))
+
+module homogeneous-Aut
+  {i : ULevel} {A : Type i}
+  (hA : homogeneous-struct A)
+  where
+  
+  ⊙Φ : (a₀ a₁ : A) → ⊙[ A , a₀ ] ⊙→ ⊙[ A , a₁ ]
+  ⊙Φ a₀ a₁ = ⊙coe (! (hA a₀ a₀) ∙ (hA a₀ a₁))
+
+  Φ : (a₀ a₁ : A) → (A → A)
+  Φ a₀ a₁ = fst (⊙Φ a₀ a₁)
+
+  is-equiv-Φ : (a₀ a₁ : A) → is-equiv (Φ a₀ a₁)
+  is-equiv-Φ a₀ a₁ = snd (⊙coe-equiv (! (hA a₀ a₀) ∙ (hA a₀ a₁)))
+
+  Φ-idf : (a₀ : A) → Φ a₀ a₀ == idf A
+  Φ-idf a₀ = ap (coe ∘ (ap de⊙)) (!-inv-l (hA a₀ a₀))
+
+  Φ-assoc : (a₀ a₁ a₂ : A) → a₀ == a₁
+    → Φ a₀ a₂ ∘ Φ a₀ a₁ == Φ a₀ (Φ a₀ a₂ a₁)
+  Φ-assoc a₀ .a₀ a₂ idp = 
+    ap (Φ a₀ a₂ ∘_) (Φ-idf a₀)
+    ∙ λ= (λ _ → idp) ∙ (ap (Φ a₀) (! (snd (⊙Φ a₀ a₂)))) 
+
+  -- Φ-comm : (a₀ a₁ a₂ : A) → a₀ == a₁
+  --   → Φ a₀ a₂ ∘ Φ a₀ a₁ == Φ a₀ a₁ ∘ Φ a₀ a₂
+

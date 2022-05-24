@@ -2,6 +2,7 @@
 
 open import lib.Base
 open import lib.Equivalence
+open import lib.Equivalence2
 open import lib.Function
 open import lib.Funext
 open import lib.NConnected
@@ -11,7 +12,9 @@ open import lib.PathFunctor
 open import lib.PathGroupoid
 open import lib.PathOver
 open import lib.groups.Homomorphism
+open import lib.groups.Isomorphism
 open import lib.groups.LoopSpace
+open import lib.types.Group
 open import lib.types.LoopSpace
 open import lib.types.Nat
 open import lib.types.Paths
@@ -89,6 +92,32 @@ module exact-seq {i : ULevel}
 
     Ωf-gp = Ω^S-group-fmap 0 ⊙f
     Ωg-gp = Ω^S-group-fmap 0 ⊙g
+
+  private abstract
+    Ωg=1→apg=1 : {β : ΩB}
+      → (Ωg β == idp)
+      → (ap g β == idp)
+    Ωg=1→apg=1 {β} ζ =
+      ap g β
+        =⟨ ap (ap g β ∙'_) (! (!-inv'-r g₀)) ⟩
+      ap g β ∙' (g₀ ∙' ! g₀)
+        =⟨ ap (_∙ ap g β ∙' g₀ ∙' ! g₀) (! (!-inv-r g₀)) ⟩
+      (g₀ ∙ ! g₀) ∙ ap g β ∙' g₀ ∙' ! g₀
+        =⟨ ∙-assoc g₀ (! g₀) (ap g β ∙' g₀ ∙' ! g₀) ⟩
+      g₀ ∙ (! g₀ ∙ (ap g β ∙' (g₀ ∙' ! g₀)))
+        =⟨ ap (g₀ ∙_) (! (∙∙'-assoc (! g₀) (ap g β) _) ∙ (! (∙'-assoc (! g₀ ∙ ap g β) g₀ (! g₀))))  ⟩
+      g₀ ∙ ((! g₀ ∙ ap g β) ∙' g₀) ∙' ! g₀
+        =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) (∙∙'-assoc (! g₀) (ap g β) g₀) ⟩
+      g₀ ∙ (! g₀ ∙ ap g β ∙' g₀) ∙' ! g₀
+        =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) (! (Ωg-β β)) ⟩
+      g₀ ∙ Ωg β ∙' ! g₀
+        =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) ζ ⟩
+      g₀ ∙ idp ∙' ! g₀
+        =⟨ ap (g₀ ∙_) (∙'-unit-l (! g₀)) ⟩
+      g₀ ∙ ! g₀
+        =⟨ !-inv-r g₀ ⟩
+      idp
+        =∎
 
   -- If g ∘ f is constant, then so is the induced map on paths
 
@@ -192,32 +221,6 @@ module exact-seq {i : ULevel}
       is-inj-Ωf α₁ α₂ ζ = 
         equiv-is-inj is-equiv-Ωfγ α₁ α₂ (Ωfγ-inj→Ωf-inj ζ)
 
-    private abstract
-      Ωg=1→apg=1 : {β : ΩB}
-        → (Ωg β == idp)
-        → (ap g β == idp)
-      Ωg=1→apg=1 {β} ζ =
-        ap g β
-          =⟨ ap (ap g β ∙'_) (! (!-inv'-r g₀)) ⟩
-        ap g β ∙' (g₀ ∙' ! g₀)
-          =⟨ ap (_∙ ap g β ∙' g₀ ∙' ! g₀) (! (!-inv-r g₀)) ⟩
-        (g₀ ∙ ! g₀) ∙ ap g β ∙' g₀ ∙' ! g₀
-          =⟨ ∙-assoc g₀ (! g₀) (ap g β ∙' g₀ ∙' ! g₀) ⟩
-        g₀ ∙ (! g₀ ∙ (ap g β ∙' (g₀ ∙' ! g₀)))
-          =⟨ ap (g₀ ∙_) (! (∙∙'-assoc (! g₀) (ap g β) _) ∙ (! (∙'-assoc (! g₀ ∙ ap g β) g₀ (! g₀))))  ⟩
-        g₀ ∙ ((! g₀ ∙ ap g β) ∙' g₀) ∙' ! g₀
-          =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) (∙∙'-assoc (! g₀) (ap g β) g₀) ⟩
-        g₀ ∙ (! g₀ ∙ ap g β ∙' g₀) ∙' ! g₀
-          =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) (! (Ωg-β β)) ⟩
-        g₀ ∙ Ωg β ∙' ! g₀
-          =⟨ ap (λ u → g₀ ∙ u ∙' ! g₀) ζ ⟩
-        g₀ ∙ idp ∙' ! g₀
-          =⟨ ap (g₀ ∙_) (∙'-unit-l (! g₀)) ⟩
-        g₀ ∙ ! g₀
-          =⟨ !-inv-r g₀ ⟩
-        idp
-          =∎
-
     -- and the same property shows that the sequence is left exact
 
     private
@@ -241,3 +244,74 @@ module exact-seq {i : ULevel}
             β
               =∎
  
+  -- Now let's assume that the sequence
+  -- 1 → ΩA → ΩB → ΩC is exact, then one can
+  -- show that the sequence
+  -- ⊙A ⊙→ ⊙B ⊙→ ⊙C must be a fibration.
+
+  module _
+    (is-inj-Ωf : is-inj Ωf)
+    (Ωg∘Ωf=1 : (α : ΩA) → (Ωg ∘ Ωf) α == idp)
+    (KerΩg→ImΩf : (β : ΩB) → (Ωg β == idp) → (Σ ΩA λ α → Ωf α == β))
+    where
+    
+    private
+      K : Type i
+      K = Σ ΩB λ β → Ωg β == idp
+
+      Φ : Type i
+      Φ = Ω ⊙[ Σ B (λ y → g y == c) , (b , g₀) ]
+
+      instance
+        lΦ : has-level ⟨ 1 ⟩ (Σ B (λ y → g y == c))
+        lΦ = Σ-level lB (λ x → raise-level _ (has-level-apply lC _ _))
+      
+      Φ-gp : Group i
+      Φ-gp = Ω^S-group 0 ⊙[ Σ B (λ y → g y == c) , (b , g₀) ]
+
+      abstract
+        apg∘Ωf : (α : ΩA) → ap g (Ωf α) == idp
+        apg∘Ωf α = Ωg=1→apg=1 (Ωg∘Ωf=1 α)
+
+      ΩA→Φ : ΩA-gp →ᴳ Φ-gp
+      ΩA→Φ = group-hom
+        (λ α → pair= (Ωf α) (↓-app=cst-in (ap (_∙ g₀) (! (apg∘Ωf α))))) 
+        λ α₁ α₂ → eq α₁ α₂
+          where abstract
+            eq : (α₁ α₂ : ΩA) → 
+              pair= (fst (⊙Ω-fmap ⊙f) (α₁ ∙ α₂))
+              (↓-app=cst-in (ap (_∙ snd ⊙g) (! (apg∘Ωf (α₁ ∙ α₂)))))
+              ==
+              pair= (fst (⊙Ω-fmap ⊙f) α₁)
+              (↓-app=cst-in (ap (_∙ snd ⊙g) (! (apg∘Ωf α₁))))
+              ∙
+              pair= (fst (⊙Ω-fmap ⊙f) α₂)
+              (↓-app=cst-in (ap (_∙ snd ⊙g) (! (apg∘Ωf α₂))))
+            eq α₁ α₂ = ! (Σ-∙ {p = Ωf α₁} {p' = Ωf α₂}
+              (↓-app=cst-in (ap (_∙ g₀) (! (apg∘Ωf α₁))))
+              (↓-app=cst-in (ap (_∙ g₀) (! (apg∘Ωf α₂)))) 
+              ∙ pair== {p = ((Ωf α₁) ∙ (Ωf α₂))} {p' = Ωf (α₁ ∙ α₂)} (! (GroupHom.pres-comp Ωf-gp α₁ α₂))
+                {q' = (↓-app=cst-in (ap (_∙ snd ⊙g) (! (apg∘Ωf (α₁ ∙ α₂)))))}
+                (from-transp _ _ (prop-path (equiv-preserves-level ((to-transp-equiv _ _)⁻¹) 
+                {{has-level-apply (has-level-apply lC _ _) _ _}}) _ _)))
+
+      -- fst= (GroupHom.f ΩA→Φ α) == Ωf α
+
+      GroupIso-ΩA→Φ : GroupIso ΩA-gp Φ-gp
+      GroupIso-ΩA→Φ = ΩA→Φ , is-eq _ Φ→ΩA to-from from-to -- contr-map-is-equiv is-contr-map-ΩA→Φ
+        where private
+          Φ→ΩA : Φ → ΩA
+          Φ→ΩA φ = fst (KerΩg→ImΩf β (! ζ'))
+            where
+              β = fst= φ
+              
+              ζ = ↓-app=cst-out (snd= φ)
+              abstract
+                ζ' : idp == Ωg β
+                ζ' = (! (!-inv-l g₀)) ∙ (ap (! g₀ ∙_) (ζ ∙ ∙=∙' (ap g _) g₀)) ∙ (! (Ωg-β _))
+
+          to-from : (φ : Φ) → GroupHom.f ΩA→Φ (Φ→ΩA φ) == φ
+          to-from φ = {!   !}
+
+          from-to : (α : ΩA) → Φ→ΩA (GroupHom.f ΩA→Φ α) == α
+          from-to α = is-inj-Ωf _ _ {!   !}
